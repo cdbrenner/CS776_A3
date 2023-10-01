@@ -35,8 +35,8 @@ class Population
         // void set_member_chosen_count();
         void get_member_chosen_stats();
 
-        void evaluate(int choice, int random_seed, int srand_offset);
-        void evaluate_o(int choice, int random_seed, int srand_offset);
+        void evaluate(int choice, int choice_2, int random_seed, int srand_offset);
+        void evaluate_o(int choice, int choice_2, int random_seed, int srand_offset);
         void stats();
         void stats_o();
         void report(int);

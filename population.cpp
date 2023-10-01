@@ -93,23 +93,35 @@ void Population::get_member_chosen_stats()
 }
 
 //choice chooses which objective function to evaluate
-void Population::evaluate(int choice, int random_seed, int srand_offset)
+void Population::evaluate(int choice, int choice_2, int random_seed, int srand_offset)
 {
     double fitness = -1;
     for(int i = 0; i < options.population_size; i++)
     {
-        fitness = eval(members[i], choice, random_seed, srand_offset + i);
+        try
+            {fitness = eval(members[i], choice, choice_2, random_seed, srand_offset + i,
+                                    options.variable_count, options.bit_length, options.scaler, options.max_variable_value,
+                                                                                    options.penalty_weight_1, options.penalty_weight_2);}
+        catch(double variable_value[])
+            {throw(variable_value);}
+        
         members[i].set_fitness(fitness);
     }
 }
 
 //choice chooses which objective function to evaluate
-void Population::evaluate_o(int choice, int random_seed, int srand_offset)
+void Population::evaluate_o(int choice, int choice_2, int random_seed, int srand_offset)
 {
     double objective_value = -1;
     for(int i = 0; i < options.population_size; i++)
     {
-        objective_value = eval_o(members[i], choice, random_seed, srand_offset + i);
+        try
+            {objective_value = eval_o(members[i], choice, choice_2, random_seed, srand_offset + i,
+                                            options.variable_count, options.bit_length, options.scaler, options.max_variable_value,
+                                                                                            options.penalty_weight_1, options.penalty_weight_2);}
+        catch(double variable_value[])
+            {throw(variable_value);}
+
         members[i].set_objective_value(objective_value);
     }
 }
