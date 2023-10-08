@@ -164,8 +164,8 @@ void GA::setup_options(int argc, char *argv[], int eval_option, int iterator)
 
             //REAL
             //OPTIONS CANNOT EQUAL ODD NUMBER OR SEGMENT FAULT!!!
-            options.population_size = 500;
-            options.max_generations = 10000;
+            options.population_size = 10;
+            options.max_generations = 20;
             
             options.ave_file = "output_floorPlanning_AVE.txt";
             options.ave_file_o = "output_floorPlanning_AVE_ObjFnc.txt";
@@ -419,6 +419,76 @@ bool GA::extinction_event(int eval_option, int random_seed, int srand_offset)
     // parent->stats_o();
 
     return true;
+}
+
+void GA::report_averager(int total_run_count)
+{
+    double temp_data[options.max_generations][4];
+    for(int i = 0; i < options.max_generations; i++)
+    {
+        for(int j = 1; j < 4; j++)
+        {
+            temp_data[i][0] = i;
+            temp_data[i][j] = 0;
+        }
+    }
+
+    for(int i = 0; i < total_run_count; i++)
+    {
+        std::string filename = "output_floorPlanning_" + options.ga_variant_name + "_" + std::to_string(i) + ".txt";
+        std::ifstream in(filename);
+
+        for(int k = 0; k < options.max_generations + 1; k++)
+        {
+            std::string temp_1;
+            if(k == 0)
+                getline(in, temp_1);
+            else
+            {
+                getline(in,temp_1,',');
+                for(int j = 1; j < 4; j++)
+                {
+                    getline(in,temp_1,',');
+                    temp_data[k-1][j] += std::strtod(temp_1.c_str(), NULL);
+                }
+             
+                getline(in,temp_1);
+            }
+        }
+
+        in.close();
+    }
+
+    
+    for(int i = 0; i < options.max_generations; i++)
+    {
+        for(int j = 1; j < 4; j++)
+        {
+            temp_data[i][j] /= total_run_count;
+        }
+    }
+
+    //TEST
+    // std::cout << "GA::AVERAGER RESULTS" << std::endl;
+    // for(int i = 0; i < options.max_generations; i++)
+    // {
+    //     for(int j = 0; j < 4; j++)
+    //     {
+    //         std::cout << temp_data[i][j] << ", ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+
+    std::string out_filename = "output_floorPlanning_" + options.ga_variant_name + "_AVE.txt";
+    std::ofstream out(out_filename);
+
+    out << "GEN,\tMIN,\t\t\tAVE,\t\t\tMAX,\n";
+    for(int i = 0; i < options.max_generations; i++)
+    {
+        out << std::fixed << std::setprecision(options.print_precision) << add_whitespace(i, options.max_generations, true)
+                << (int)temp_data[i][0] << ",\t\t" << temp_data[i][1] << ",\t\t" << temp_data[i][2] << ",\t\t" << temp_data[i][3] << std::endl;
+    }
+    out.close();
 }
 
 void GA::report_cleanup()

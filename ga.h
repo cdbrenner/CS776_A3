@@ -38,6 +38,7 @@ class GA
         void run(int eval_option, int report_option);
         bool extinction_check(int eval_option, int random_seed, int srand_offset);
         bool extinction_event(int eval_option, int random_seed, int srand_offset);
+        void report_averager(int total_generation_count);
         void report_cleanup();
 
         const Options get_options();

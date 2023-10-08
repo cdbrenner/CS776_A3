@@ -199,6 +199,24 @@ int main(int argc, char* argv[])
         // count++;
     }
 
+    GA ga(argc, argv, 6, runs, ga_variant_option);
+    switch(ga_variant_option)
+    {
+        case 1:
+            ga.set_option_ga_variant_name("S");
+            break;
+        case 2:
+            ga.set_option_ga_variant_name("S-E"); // THIS NAME IS BEING USED TO TRIGGER PROPER EXTINCTION_EVENT
+            break;
+        case 3:
+            ga.set_option_ga_variant_name("CHC");
+            break;
+        case 4:
+            ga.set_option_ga_variant_name("CHC-E");
+            break;
+    }
+    ga.report_averager(runs);
+
     //TEST
     // std::cout << "OUTSIDE OF RUN: END OF PROGRAM" << std::endl;
 
