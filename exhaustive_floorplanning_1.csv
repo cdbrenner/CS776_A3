@@ -1,0 +1,25 @@
+FITNESS & OBJECTIVE,,
+max_fitness, 49358.25,
+min_objective, 641.75,
+
+LENGTHS & WIDTHS,,
+living length, 13.50,
+living width, 9.00,
+kitchen length, 9.00,
+kitchen width, 6,
+hall length, 5.5,
+hall width, 3.50,
+bed_1 length, 15.00,
+bed_1 width, 10.00,
+bed_2 length, 13.50,
+bed_2 width, 9.00,
+bed_3 length, 13.50,
+bed_3 width, 9.00
+
+AREAS,,
+Living Area, 121.50
+Kitchen Area, 54.00
+Hall Area, 19.25
+Bed_1 Area, 150.00
+Bed_2 Area, 121.50
+Bed_3 Area, 121.50

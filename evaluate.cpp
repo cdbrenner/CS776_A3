@@ -126,6 +126,16 @@ double floorPlanning(Individual& individual, int variable_count, int bit_length[
 {
     double fitness = -1;
     double *variables = decode_withVarsOfDiffBitLength_onlyPositive(individual, variable_count, bit_length, scaler);
+    
+    //SETTING DIMENSIONS OF THE INDIVIDUAL IS DONE SO THAT THE DIMENSIONS CAN BE PULLED LATER IN void Population::report(int generation, int option) FOR LOGGING
+    individual.set_dimensions(variables, variable_count);
+
+    //TEST
+    // char temp;
+    // std::cout << "variables[0] = " << variables[0] << std::endl;
+    // std::cout << "dimensions[0] = " << individual.get_dimensions()[0] << std::endl;
+    // std::cin >> temp;
+
     double *catch_block_data = new double[2];
 
     try
@@ -172,6 +182,9 @@ double floorPlanning(Individual& individual, int variable_count, int bit_length[
     bed_3 < 100 ? bed_3 = 180 + weight_normal*(100 - bed_3) : 0;
     bed_3 > 180 ? bed_3 = 180 + weight_normal*(bed_3 - 180) : 0;
 
+    //TEST
+    // double objective_function = 2*kitchen + hall + bed_1 + bed_2 + bed_3;
+    //REAL
     double objective_function = living + 2*kitchen + hall + bed_1 + bed_2 + bed_3;
     
     fitness = 50000 - objective_function;

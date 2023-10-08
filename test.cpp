@@ -124,3 +124,143 @@ void test_nine_variables_in_random_choice(int runs, int bit_length)
     std::cout << "eight = " << (double)eight/runs << std::endl;
     std::cout << "nine = " << (double)nine/runs << std::endl;
 }
+
+void verify_xover_mutation_mechanism(Population* parent, Population* child, Population* grandparent, int generation)
+{
+    // //TEST
+    // if(grandparent != nullptr)
+    // {
+    //     std::cout << "TEST::XOVER_VERIFY: : GRANDPARENT POPULATION" << std::endl;
+    //     grandparent->print_pop();
+    //     std::cout << std::endl;
+    // }   
+    // std::cout << "TEST::XOVER_VERIFY: : PARENT POPULATION" << std::endl;
+    // parent->print_pop();
+    // std::cout << "TEST::XOVER_VERIFY: : PARENT XOVER_MUTATE DATA" << std::endl;
+    // parent->print_xover_mut_data();
+    // std::cout << std::endl;
+    // std::cout << "TEST::XOVER_VERIFY: : CHILD POPULATION" << std::endl;
+    // child->print_pop();
+    // std::cout << "TEST::XOVER_VERIFY: : CHILD XOVER_MUTATE DATA" << std::endl;
+    // child->print_xover_mut_data();
+    // std::cout << std::endl;
+
+    bool equal = true;
+    std::string error_message = "XOVER-MUTATE MECHANISM TEST FAILED";
+
+    // NOTE(10/7/23): I'm expecting this to fail one of these days because children are created with a small probability of no xover and no mutation
+    // 1ST - VERIFY FAILED CHECK
+    // for(int i = 0; i < parent->get_options().population_size; i++)
+    // {
+    //     for(int j = 0; j < parent->get_options().chromosome_length; j++)
+    //     {
+    //         if(parent->get_members()[i].get_chromosome()[j] != child->get_members()[i].get_chromosome()[j])
+    //         {
+    //             equal = false;
+    //             break;
+    //         }
+    //     }
+    //     if(!equal)
+    //         break;
+    // }
+
+    // if(equal)
+    //     throw("XOVER-MUTATE MECHANISM FAILED THE CONTRADICTION TEST");
+
+    generation == 1 ? grandparent = parent : 0;
+
+    // 2ND - VERIFY PASSING CHECK
+    equal = true;
+    for(int i = 0; i < parent->get_options().population_size; i++)
+    {
+        int isParent = child->get_transform_data()[i][child->get_options().m_isParent_index];
+        int parent_1_index = child->get_transform_data()[i][child->get_options().m_parent_1_index];
+        int parent_2_index = child->get_transform_data()[i][child->get_options().m_parent_2_index];
+        int xover_index = child->get_transform_data()[i][child->get_options().m_xover_index];
+        int total_mutations = child->get_transform_data()[i][0] - child->get_options().m_meta_length;
+        generation == 1 && isParent ? total_mutations = 0 : 0;
+        
+        int mutation_count = 0;
+        {
+            for(int j = 0; xover_index != -1 ? j <= xover_index : j < parent->get_options().chromosome_length; j++)
+            {
+                // if(parent->get_members()[parent_1_index].get_chromosome()[j] != child->get_members()[i].get_chromosome()[j])
+                if(child->get_members()[i].get_chromosome()[j] != (isParent ? grandparent->get_members()[parent_1_index].get_chromosome()[j]
+                                                                                : parent->get_members()[parent_1_index].get_chromosome()[j]))
+                {
+                    if(mutation_count == total_mutations || j != child->get_transform_data()[i][child->get_options().m_meta_length + mutation_count]) // 4 PREVIOUS ARRAY MEMBERS + MUTATION_COUNT BEFORE VERIFYING MUTATION
+                    {
+                        //TEST
+                        std::cout << "::TEST: FAILED!" << std::endl;
+                        if(!isParent)
+                            std::cout << "CHILD["<<i<<"]\n";
+                        else
+                            std::cout << "CHILD-PARENT["<<i<<"]\n";
+                        std::cout << "BEFORE XOVER" << std::endl;
+                        std::cout << "total mutations = " << total_mutations << std::endl;
+                        std::cout << "mutation count =  " << mutation_count << std::endl;
+                        std::cout << "j =               " << j << std::endl;
+                        std::cout << "mutation index =  " << child->get_transform_data()[i][child->get_options().m_meta_length + mutation_count] << std::endl;
+
+                        equal = false;
+                        break;
+                    }
+                    mutation_count++;
+                }
+            }
+            if(xover_index != - 1)
+            {
+                for(int j = xover_index+1; j < parent->get_options().chromosome_length; j++)
+                {
+                    // if(parent->get_members()[parent_2_index].get_chromosome()[j] != child->get_members()[i].get_chromosome()[j])
+                    if(child->get_members()[i].get_chromosome()[j] != (isParent ? grandparent->get_members()[parent_2_index].get_chromosome()[j]
+                                                                                : parent->get_members()[parent_2_index].get_chromosome()[j]))
+                    {
+                        if(mutation_count == total_mutations || j != child->get_transform_data()[i][child->get_options().m_meta_length + mutation_count])
+                        {
+                            //TEST
+                            std::cout << "::TEST: FAILED!" << std::endl;
+                            if(!isParent)
+                                std::cout << "CHILD["<<i<<"]\n";
+                            else
+                                std::cout << "CHILD-PARENT["<<i<<"]\n";
+                            std::cout << "AFTER XOVER" << std::endl;
+                            std::cout << "total mutations = " << total_mutations << std::endl;
+                            std::cout << "mutation count =  " << mutation_count << std::endl;
+                            std::cout << "j =               " << j << std::endl;
+                            std::cout << "mutation index =  " << child->get_transform_data()[i][child->get_options().m_meta_length + mutation_count] << std::endl;
+
+                            equal = false;
+                            break;
+                        }
+                        mutation_count++;
+                    }
+                }
+            }
+        }
+        if(!equal)
+            break;
+    }
+    
+    if(!equal)
+        throw(error_message);
+}
+
+void verify_string_equivalence(Individual* one, Individual* two, std::string function_location)
+{
+    int one_length = one->get_chromosome_length();
+    int two_length = two->get_chromosome_length();
+    if(one_length != two_length)
+    {
+        std::string error_message = "STRING EQUIVALENCE FAILED DUE TO NON-EQUAL LENGTHS IN " + function_location;
+        throw(error_message);
+    }
+    for(int i = 0; i < one_length; i++)
+    {
+        if(one->get_chromosome()[i] != two->get_chromosome()[i])
+        {
+            std::string error_message = "STRING EQUIVALENCE FAILED DUE TO NON-MATCHING ELEMENTS IN " + function_location;
+            throw(error_message);
+        }
+    }
+}
