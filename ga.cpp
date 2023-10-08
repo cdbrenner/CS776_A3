@@ -44,8 +44,10 @@ void GA::setup_options(int argc, char *argv[], int eval_option, int iterator)
 
     options.GA_iteration = iterator;
     options.random_seed = time(NULL) + iterator;
-    options.extinction_interval = 1000;
-    options.convergence_resolution = 0.0008;
+    options.extinction_interval = 1;
+    options.convergence_resolution_threshold = 0.0015;
+    options.super_individual_threshold = 1.004;
+    options.semi_super_individual_threshold = 1.002;
     
     //FLOORPLANNING
     options.penalty_weight_1 = 2;
@@ -181,18 +183,11 @@ void GA::setup_options(int argc, char *argv[], int eval_option, int iterator)
                 options.chromosome_length += options.bit_length[i];
             }
 
-            //TEST
-            // std::cout << "TEST::GA.cpp -> chromosome_length = " << options.chromosome_length << std::endl;
- 
-            //TEST
-            //OPTIONS CANNOT EQUAL ODD NUMBER OR SEGMENT FAULT!!!
-            options.population_size = 10;
-            options.max_generations = 50;
             //REAL
             //OPTIONS CANNOT EQUAL ODD NUMBER OR SEGMENT FAULT!!!
-            // options.population_size = 500;
-            // options.max_generations = 5000;
-            options.probability_mutation = 0.1;
+            options.population_size = 500;
+            options.max_generations = 5000;
+            options.probability_mutation = 0.6;
             options.probability_x = 0.99;
             options.input_file = "output_floorPlanning_" + temp2 + ".txt";
             options.input_file_o = "output_floorPlanning_" + temp2 + "_ObjFnc.txt";
@@ -208,11 +203,10 @@ void GA::setup_options(int argc, char *argv[], int eval_option, int iterator)
 
 void GA::init(int eval_option, int report_option)
 {
-    //REAL: COMMENTED OUT FOR TESTING XOVER_MUTATE TEST FUNCTION
     if(report_option == 1)
     {
         std::ofstream out(options.output_file);
-        out << "GEN,\t\tMIN,\t\t\tAVE,\t\t\tMAX,\t\t\tCONV,\t\tSEMI,\t\tSUPER,\t\tL_L,\t\tL_W,\t\tL_a,\t\tK_L,\t\tK_W,\t\tK_A,\t\tH_L,\t\tH_W,\t\tH_A,\t\tB1_L,\t\tB1_W,\t\tB1_A,\t\tB2_L,\t\tB2_W,\t\tB2_A,\t\tB3_L,\t\tB3_W,\t\tB3_A,\n";
+        out << "GEN,\t\tMIN,\t\t\t\tAVE,\t\t\t\tMAX,\t\t\t\tCONV,\t\t\tSEMI,\t\tSUPER,\tT_SEMI,\tT_SUPER,\tL_L,\t\t\tL_W,\t\tL_a,\t\tK_L,\t\tK_W,\t\tK_A,\t\tH_L,\t\tH_W,\t\tH_A,\t\tB1_L,\t\tB1_W,\t\tB1_A,\t\tB2_L,\t\tB2_W,\t\tB2_A,\t\tB3_L,\t\tB3_W,\t\tB3_A,\n";
         out.close();
     }
     
@@ -227,14 +221,7 @@ void GA::init(int eval_option, int report_option)
     m_temp = new Population(options);
 
     for(int i = 0; i < options.population_size; i++)
-    {
-        add_dynamic_element_to_end(parent->get_transform_data()[i], parent->get_transform_data()[i][0], i);
-        parent->get_transform_data()[i][0]++;;
-        add_dynamic_element_to_end(parent->get_transform_data()[i], parent->get_transform_data()[i][0], i);
-        parent->get_transform_data()[i][0]++;;
-        add_dynamic_element_to_end(parent->get_transform_data()[i], parent->get_transform_data()[i][0], -1); // -1 INDICATES NO XOVER (1ST GENERATION CHARACTERISTIC)
-        parent->get_transform_data()[i][0]++;;
-    }
+        parent->init_transform_data(i);
 
     try
     {
@@ -246,10 +233,10 @@ void GA::init(int eval_option, int report_option)
         throw(variable_value);
     }
 
-    parent->stats();
+    parent->stats(total_super_individuals, total_semi_super_individuals);
 
     if(report_option == 1)
-        parent->report(0, 1);
+        parent->report(0, 1, total_super_individuals, total_semi_super_individuals);
     
     //OBJECTIVE OPERATIONS REPORT COMMENTED OUT
     // parent->stats_o();
@@ -258,190 +245,126 @@ void GA::init(int eval_option, int report_option)
 
 void GA::run(int eval_option, int report_option)
 {
+    bool extinction = false;
+
     for(int i = 1; i < options.max_generations; i++)
     {
-        //TEST
-        // std::cout << "GA::RUN(TOP): before test init" << std::endl;
+        //TEST: PRINTS GENERATION FOR CLARITY
+        // std::cout << "\n\nGENERATION = " << i << std::endl << std::endl;
 
-        //UNIT TEST OBJECTS
+        int srand_offset = i*options.population_size;
+
+        // UNIT TEST OBJECTS
         Individual *test = new Individual[options.population_size];
         for(int i = 0; i < options.population_size; i++)
-        {
-            test[i].init_chromosome_array(options.chromosome_length);
             test[i].copy_individual_data(parent->get_members()[i]);
-        }
     
-
-        //TEST: CURRENT TEST!!!!
-        std::cout << "\n\nGA::RUN(TOP): GEN = " << i << std::endl << std::endl;
-        // std::cout << "GA::RUN(TOP): PARENT POPULATION" << std::endl;
-        // parent->print_pop();
-        // if(grandparent != nullptr)
-        // {
-        //     std::cout << "GA::RUN(): GRANDPARENT POPULATION" << std::endl;
-        //     grandparent->print_pop();
-        // }
-
         parent->generation(child, i);
         
-        // TEST: CURRENT TEST!!!
-        // std::cout << "GA::RUN(BELOW GEN): PARENT POPULATION" << std::endl;
-        // parent->print_pop();
-        // std::cout << "GA::RUN(BELOW GEN): CHILD POPULATION" << std::endl;
-        // child->print_pop();
-
-        //TEST
-        // char temp_c;
-        // std::cin >> temp_c;
-
         try
         {
-            child->evaluate(eval_option, 1, options.random_seed, i*options.population_size);
-            child->evaluate_o(eval_option, 2, options.random_seed, i*options.population_size);
+            child->evaluate(eval_option, 1, options.random_seed, srand_offset);
+            child->evaluate_o(eval_option, 2, options.random_seed, srand_offset);
         }
         catch(double variable_value[])
         {
             throw(variable_value);
         }
-        
-        //TEST
-        // std::cout << "GA::RUN(BELOW EVAL CHILD): PARENT POPULATION" << std::endl;
-        // parent->print_pop();
-        // std::cout << "CHILD TRANSFORM DATA LENGTH [0] = " << parent->get_child_transform_data()[0][0] << std::endl;
-        std::cout << "GA::RUN(ABOVE SET CHILD TRANSFORM)" << std::endl;
 
-        child->set_transform_data(parent->get_child_transform_data());
-        
-        //TEST
-        std::cout << "GA::RUN(BELOW SET CHILD TRANSFORM)" << std::endl;
-        // std::cout << "GA::RUN(BELOW SET TRANSFORM): PARENT POPULATION" << std::endl;
-        // parent->print_pop();
-
-        parent->CHC_generation(child);
-        
-        //TEST
-        std::cout << "GA::RUN(BELOW CHC)" << std::endl;
-        
-
-        //UNIT TEST
-        for(int i = 0; i < options.population_size; i++)
+        //SET THE CHILD'S TRANSFORM_DATA WITH THE PARENTS CHILD_TRANSFORM_DATA
+        for(int j = 0; j < options.population_size; j++)
         {
-            verify_string_equivalence(&parent->get_members()[i],&test[i],"GA::RUN, AFTER CHC GENERATION");
+            for(int k = 0; k < parent->get_child_transform_data(j)[0]; k++)
+            {
+                child->get_transform_data(j)[k] = parent->get_child_transform_data(j)[k];
+            }
         }
 
-        // MAIN TEST! MAIN TEST! MAIN TEST! MAIN TEST! MAIN TEST! MAIN TEST! MAIN TEST! MAIN TEST! MAIN TEST!
-        // MAIN TEST! MAIN TEST! MAIN TEST! MAIN TEST! MAIN TEST! MAIN TEST! MAIN TEST! MAIN TEST! MAIN TEST!
-        // if(grandparent != nullptr)
-        // {
-        //     std::cout << "GA::RUN(): PARENT POPULATION" << std::endl;
-        //     parent->print_pop();
-        //     std::cout << "GA::RUN(): PARENT XOVER_MUTATE DATA" << std::endl;
-        //     parent->print_xover_mut_data();
-        //     std::cout << std::endl;
-        // }   
+        parent->CHC_generation(child, m_temp);
 
-
-        //TEST
-        if(grandparent != nullptr)
+        // UNIT TESTS: STRING EQUIVALENCE
+        for(int j = 0; j < options.population_size; j++)
         {
-            std::cout << "GA::RUN(BELOW CHC): GRANDPARENT POPULATION" << std::endl;
-            grandparent->print_pop();
+            verify_string_equivalence(&parent->get_members()[j],&test[j],"GA::RUN, AFTER CHC GENERATION");
         }
-        // TEST
-        std::cout << "GA::RUN(BELOW CHC): PARENT POPULATION" << std::endl;
-        parent->print_pop();
-        std::cout << "GA::RUN(BELOW CHC): PARENT XOVER_MUTATE DATA" << std::endl;
-        parent->print_xover_mut_data();
-        std::cout << std::endl;
 
-        // std::cout << "GA::RUN(BELOW CHC): PARENT POPULATION - MANUAL" << std::endl;
-        // for(int i = 0; i < options.population_size; i++)
-        // {
-        //     for(int j = 0; j < options.chromosome_length; j++)
-        //     {
-        //         if(j == 0)
-        //             std::cout << "MEM["<<i<<"]: " << parent->get_members()[i].get_chromosome()[j];
-        //         else
-        //             std::cout << parent->get_members()[i].get_chromosome()[j];
-        //     }
-        //     std::cout << std::endl;
-        // }
+        // UNIT TEST: XOVER MUTATE MECHANISM
+        verify_xover_mutation_mechanism(parent, child);
 
-        //CURRENT TEST
-        std::cout << std::endl;
-        std::cout << "GA::RUN(BELOW CHC): CHILD POPULATION" << std::endl;
-        child->print_pop();
-        std::cout << "GA::RUN(BELOW CHC): CHILD XOVER_MUTATE DATA" << std::endl;
-        child->print_xover_mut_data();
-        std::cout << std::endl;
-
-        //TEST
-        // std::cout << "GEN = " << i << std::endl;
-        // char temp_c;
-        // std::cin >> temp_c;
-
-        verify_xover_mutation_mechanism(parent, child, grandparent, i);
-
-        child->stats();
+        child->stats(total_super_individuals, total_semi_super_individuals);
 
         if(report_option == 1)
-            child->report(i, 1);
+            child->report(i, 1, total_super_individuals, total_semi_super_individuals);
 
         //OBJECTIVE OPERATIONS REPORT COMMENTED OUT
         // child->stats_o();
         // child->report_o(i, 1);
 
-        // TEST
-        std::cout << "GA::RUN(): BEFORE GRANDPARENT = PARENT" << std::endl;
-        
-        grandparent = new Population(*parent);
-        
-        // TEST
-        std::cout << "GA::RUN(): AFTER GRANDPARENT = PARENT" << std::endl;
+        //TEST: PRINT POPULATION AND TRANSFORM DATA
+        // if(extinction)
+        // {
+        //     // std::cout << "\nPOP::RUN(BELOW REPORT)" << std::endl;
+        //     // print_population_data();
 
-        //TEST
-        // std::cout << "GA::RUN(): AT GRANDPARENT = PARENT" << std::endl;
-        // std::cout << "GA::RUN(): PARENT POPULATION" << std::endl;
-        // parent->print_pop();
-        // std::cout << "GA::RUN(): GRANDPARENT POPULATION" << std::endl;
-        // grandparent->print_pop();
+        //     //TEST
+        //     char temp;
+        //     std::cin >> temp;
+        //     extinction = false;
+        // }
         
-        Population *temp_pop = parent;
+        Population *temp = parent;
         parent = child;
-        child = temp_pop;
+        child = temp;
 
-        // extinction_check();
+        extinction = extinction_check(eval_option, options.random_seed, srand_offset);
 
         delete[] test;
     }
 
     // report_cleanup();
-
-    //TEST
-    // std::cout << "END OF RUN" << std::endl;
 }
 
-void GA::extinction_check()
+bool GA::extinction_check(int eval_option, int random_seed, int srand_offset)
 {
     double convergence = parent->get_convergence();
     double convergence_check = convergence - 1;
 
-    convergence_check < options.convergence_resolution ? extinction_counter++ : 0;
+    convergence_check < options.convergence_resolution_threshold ? extinction_counter++ : extinction_counter = 0;
     
     //TEST
     // std::cout << extinction_counter << std::endl;
 
-    extinction_counter == options.extinction_interval ? extinction_event() : void();
+    return extinction_counter == options.extinction_interval ? extinction_event(eval_option, options.random_seed, srand_offset) : false;
 }
 
-void GA::extinction_event()
+//IF USING CHC, FITTEST MEMBER IS AT TOP OF PARENT - OTHERWISE NEED TO REWRITE EXTINCTION_EVENT
+bool GA::extinction_event(int eval_option, int random_seed, int srand_offset)
 {
+    //TEST
+    std::cout << "EXTINCTION EVENT!" << std::endl;
+
     extinction_counter = 0;
     
-    //TEST
-    // std::cout << "EXTINCTION EVENT! EXTINCTION EVENT! EXTINCTION EVENT! EXTINCTION EVENT! EXTINCTION EVENT!" << std::endl;
+    for(int i = 1; i < options.population_size; i++)
+    {
+        parent->get_members()[i].init(random_seed, srand_offset + i);
+        parent->init_transform_data(i);
+    }
 
+    try
+    {
+        parent->evaluate(eval_option, 1, options.random_seed, srand_offset);
+        // parent->evaluate_o(eval_option, 2, options.random_seed, srand_offset);
+    }
+    catch(double variable_value[])
+    {
+        throw(variable_value);
+    }
 
+    parent->stats(total_super_individuals, total_semi_super_individuals);
+    // parent->stats_o();
+
+    return true;
 }
 
 void GA::report_cleanup()
@@ -456,4 +379,17 @@ void GA::report_cleanup()
 const Options GA::get_options()
 {
     return options;
+}
+
+void GA::print_population_data()
+{
+        std::cout << "PARENT POPULATION" << std::endl;
+        parent->print_pop();
+        std::cout << "PARENT TRANSFORM DATA" << std::endl;
+        parent->print_xover_mut_data();
+        std::cout << "\nCHILD POPULATION" << std::endl;
+        child->print_pop();
+        std::cout << "CHILD TRANSFORM DATA" << std::endl;
+        child->print_xover_mut_data();
+        std::cout << std::endl;
 }

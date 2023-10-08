@@ -25,4 +25,4 @@ test.o: test.cpp test.h
 	g++ -c test.cpp
 
 clean:
-	rm -rf x *.o output.txt
+	rm -rf x *.o

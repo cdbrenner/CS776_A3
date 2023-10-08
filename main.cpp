@@ -4,16 +4,40 @@
 //AFTER TESTING REPORT CLEANUP FROM GA.CPP NEEDS TO BE COMMENTED BACK IN 
 int main(int argc, char* argv[])
 {
-    // int count = 0;
-    for(int j = 0; j < 1; j++)
+    if(argc == 1)
+    {
+        std::cout << "If report is needed, must set argv[1] = 1; otherwise reporting is skipped" << std::endl;
+        std::cout << "If multiple runs are needed, must set argv[2] = #runs; 1 run by default" << std::endl;
+    }
+
+    int report_option = 0;
+    int runs = 1;
+    
+    if(argc == 2)
+    {
+        report_option = std::stoi(argv[1]);
+    }
+    
+    if(argc == 3)
+    {
+        report_option = std::stoi(argv[1]);
+        runs = std::stoi(argv[2]);
+        if(runs <= 0 || runs > 10)
+        {
+            std::cout << "Can only choose up to 10 runs maximum" << std::endl;
+            std::cout << "Switching to 1 run default" << std::endl;
+            runs = 1;
+        }
+    }
+    for(int j = 0; j < runs; j++)
     {
         //TEST
-        std::cout << "MAIN::RUN = " << j << std::endl << std::endl;
+        // std::cout << "MAIN::RUN = " << j << std::endl << std::endl;
 
         GA ga(argc, argv, 6, j);
 
         try
-            {ga.init(6, 0);}
+            {ga.init(6, report_option);}
         catch(double variable_value[])
         {
 
@@ -47,7 +71,7 @@ int main(int argc, char* argv[])
         }
 
         try
-            {ga.run(6, 0);}
+            {ga.run(6, report_option);}
         catch(double variable_value[])
         {
 

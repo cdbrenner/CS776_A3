@@ -1,19 +1,20 @@
 //TESTS IN REPORT(), STATS()
+// UNIT TESTS IN GENERATION(), XOVER_MUTATE(), CHC_GENERATION()
 #include "population.h"
 #include "test.h"
 
 Population::Population()
 {
-    child_transform_data = new int*[options.population_size];
     for(int i = 0; i < options.population_size; i++)
     {
-        child_transform_data[i] = new int[2]{2,0};
+        child_transform_data[i][0] = 2;
+        child_transform_data[i][1] = 0;
     }
     
-    transform_data = new int*[options.population_size];
     for(int i = 0; i < options.population_size; i++)
     {
-        transform_data[i] = new int[2]{2,1};
+        transform_data[i][0] = 2;
+        transform_data[i][1] = 1;
     }
  
     average = min = max = sum_fitness = convergence = -1;
@@ -28,16 +29,16 @@ Population::Population(Options options)
 {
     this->options = options;
     
-    child_transform_data = new int*[options.population_size];
     for(int i = 0; i < options.population_size; i++)
     {
-        child_transform_data[i] = new int[2]{2,0};
+        child_transform_data[i][0] = 2;
+        child_transform_data[i][1] = 0;
     }
     
-    transform_data = new int*[options.population_size];
     for(int i = 0; i < options.population_size; i++)
     {
-        transform_data[i] = new int[2]{2,1};
+        transform_data[i][0] = 2;
+        transform_data[i][1] = 1;
     }
  
     average = min = max = sum_fitness = convergence = -1;
@@ -54,16 +55,16 @@ Population::Population(Options options, int srand_offset)
 {
     this->options = options;
 
-    child_transform_data = new int*[options.population_size];
     for(int i = 0; i < options.population_size; i++)
     {
-        child_transform_data[i] = new int[2]{2,0};
+        child_transform_data[i][0] = 2;
+        child_transform_data[i][1] = 0;
     }
     
-    transform_data = new int*[options.population_size];
     for(int i = 0; i < options.population_size; i++)
     {
-        transform_data[i] = new int[2]{2,1};
+        transform_data[i][0] = 2;
+        transform_data[i][1] = 1;
     }
  
     average = min = max = sum_fitness = convergence = -1;
@@ -81,7 +82,7 @@ Population::Population(Population& rhs)
     members = new Individual[options.population_size];
     for(int i = 0; i < options.population_size; i++)
     {
-        members[i].init_chromosome_array(options.chromosome_length);
+        // members[i].init_chromosome_array(options.chromosome_length);
         members[i].copy_individual_data(rhs.get_members()[i]);
     }
 }
@@ -94,25 +95,25 @@ Population::~Population()
     if(max_fitness_dimensions != nullptr)
         delete max_fitness_dimensions;
 
-    if(child_transform_data != nullptr)
-    {
-        for(int i = 0; i < options.population_size; i++)
-        {
-            if(child_transform_data[i] != nullptr)
-                delete[] child_transform_data[i];
-        }
-        delete[] child_transform_data;
-    }
+    // if(child_transform_data != nullptr)
+    // {
+    //     for(int i = 0; i < options.population_size; i++)
+    //     {
+    //         if(child_transform_data[i] != nullptr)
+    //             delete[] child_transform_data[i];
+    //     }
+    //     delete[] child_transform_data;
+    // }
 
-    if(transform_data != nullptr)
-    {
-        for(int i = 0; i < options.population_size; i++)
-        {
-            if(transform_data[i] != nullptr)
-                delete[] transform_data[i];
-        }
-        delete[] transform_data;
-    }
+    // if(transform_data != nullptr)
+    // {
+    //     for(int i = 0; i < options.population_size; i++)
+    //     {
+    //         if(transform_data[i] != nullptr)
+    //             delete[] transform_data[i];
+    //     }
+    //     delete[] transform_data;
+    // }
 
     // if(parent_1 != nullptr)
     //     delete parent_1;
@@ -125,6 +126,15 @@ Population::~Population()
 
     // if(child_2 != nullptr)
     //     delete child_2;
+}
+
+void Population::init_transform_data(int row)
+{
+    transform_data[row][0] = options.m_meta_length;
+    transform_data[row][1] = 1;
+    transform_data[row][2] = row;
+    transform_data[row][3] = row;
+    transform_data[row][4] = -1;
 }
 
 void Population::set_options(Options options)
@@ -163,36 +173,50 @@ void Population::copy_members(const Population &copy)
 void Population::copy_population(const Population &copy)
 {
     copy_members(copy);
-    set_transform_data(copy.transform_data);
-    set_child_transform_data(copy.child_transform_data);
-
-}
-
-void Population::set_transform_data(int** data)
-{
-    //TEST
-    // std::cout << "POP::SET_TRANSFORM" << std::endl;
-    // std::cout << "PASSED DATA[0][0] = " << data[0][0] << std::endl;
-    if(transform_data != nullptr)
-    {
-        for(int i = 0; i < options.population_size; i++)
-        {
-            if(transform_data[i] != nullptr)
-                delete[] transform_data[i];
-        }
-        delete[] transform_data;
-        transform_data = nullptr;
-    }
-    
-    transform_data = new int*[options.population_size];
 
     for(int i = 0; i < options.population_size; i++)
     {
-        transform_data[i] = new int[data[i][0]];
-        for(int j = 0; j < data[i][0]; j++)
-            transform_data[i][j] = data[i][j];
+        for(int j = 0; j < copy.transform_data[i][0]; j++)
+        {
+            transform_data[i][j] = copy.transform_data[i][j];
+        }
     }
+
+    for(int i = 0; i < options.population_size; i++)
+    {
+        for(int j = 0; j < copy.child_transform_data[i][0]; j++)
+        {
+            child_transform_data[i][j] = copy.child_transform_data[i][j];
+        }
+    }
+
 }
+
+// void Population::set_transform_data(const int*data[1000])
+// {
+    //TEST
+    // std::cout << "POP::SET_TRANSFORM" << std::endl;
+    // std::cout << "PASSED DATA[0][0] = " << data[0][0] << std::endl;
+    // if(transform_data != nullptr)
+    // {
+    //     for(int i = 0; i < options.population_size; i++)
+    //     {
+    //         if(transform_data[i] != nullptr)
+    //             delete[] transform_data[i];
+    //     }
+    //     delete[] transform_data;
+    //     transform_data = nullptr;
+    // }
+    
+    // transform_data = new int*[options.population_size];
+
+    // for(int i = 0; i < options.population_size; i++)
+    // {
+    //     transform_data[i] = new int[data[i][0]];
+    //     for(int j = 0; j < data[i][0]; j++)
+    //         transform_data[i][j] = data[i][j];
+    // }
+// }
 
 void Population::set_transform_data_by_row(int* data, int row)
 {
@@ -202,32 +226,32 @@ void Population::set_transform_data_by_row(int* data, int row)
     }
 }
 
-void Population::set_child_transform_data(int** data)
-{
+// void Population::set_child_transform_data(int** data)
+// {
     //TEST
     // std::cout << "POP::SET_TRANSFORM" << std::endl;
     // std::cout << "PASSED DATA[0][0] = " << data[0][0] << std::endl;
-    if(child_transform_data != nullptr)
-    {
-        for(int i = 0; i < options.population_size; i++)
-        {
-            if(child_transform_data[i] != nullptr)
-                delete[] child_transform_data[i];
-        }
-        delete[] child_transform_data;
-        child_transform_data = nullptr;
-    }
+    // if(child_transform_data != nullptr)
+    // {
+    //     for(int i = 0; i < options.population_size; i++)
+    //     {
+    //         if(child_transform_data[i] != nullptr)
+    //             delete[] child_transform_data[i];
+    //     }
+    //     delete[] child_transform_data;
+    //     child_transform_data = nullptr;
+    // }
 
-    child_transform_data = new int*[options.population_size];
-    for(int i = 0; i < options.population_size; i++)
-    {   
-        child_transform_data[i] = new int[data[i][0]];
-        for(int j = 0; j < data[i][0]; j++)
-        {
-            child_transform_data[i][j] = data[i][j];
-        }
-    }
-}
+    // child_transform_data = new int*[options.population_size];
+    // for(int i = 0; i < options.population_size; i++)
+    // {   
+    //     child_transform_data[i] = new int[data[i][0]];
+    //     for(int j = 0; j < data[i][0]; j++)
+    //     {
+    //         child_transform_data[i][j] = data[i][j];
+    //     }
+    // }
+// }
 
 void Population::set_child_transform_data_by_row(int* data, int row)
 {
@@ -237,24 +261,39 @@ void Population::set_child_transform_data_by_row(int* data, int row)
     }
 }
 
-void Population::set_is_parent(bool parent_status)
-{
-    is_parent = parent_status;
-}
-
 Individual* Population::get_members()
 {
     return members;
 }
 
-int** Population::get_transform_data()
+int* Population::get_transform_data(int row)
 {
-    return transform_data;
+    return transform_data[row];
 }
 
-int** Population::get_child_transform_data()
+int* Population::get_child_transform_data(int row)
 {
-    return child_transform_data;
+    return child_transform_data[row];
+}
+
+double Population::get_min()
+{
+    return min;
+}
+
+double Population::get_max()
+{
+    return max;
+}
+
+double Population::get_average()
+{
+    return average;
+}
+
+double Population::get_sum_fitness()
+{
+    return sum_fitness;
 }
 
 double Population::get_convergence()
@@ -279,19 +318,9 @@ void Population::get_member_chosen_stats()
     }
 }
 
-double Population::get_sum_fitness()
-{
-    return sum_fitness;
-}
-
 Options Population::get_options()
 {
     return options;
-}
-
-bool Population::get_is_parent()
-{
-    return is_parent;
 }
 
 //CHOICE CHOOSES WHICH OBJECTIVE FUNCTION TO EVALUATE
@@ -328,7 +357,7 @@ void Population::evaluate_o(int choice, int choice_2, int random_seed, int srand
     }
 }
 
-void Population::stats()
+void Population::stats(int total_super_individuals, int total_semi_super_individuals)
 {
     sum_fitness = convergence = 0;
     min = max = members[0].get_fitness();
@@ -357,14 +386,9 @@ void Population::stats()
     {
         double scale = members[i].get_fitness()/average;
 
-        //TEST
-        // std::cout << "members[i].get_fitness() = " << members[i].get_fitness() << std::endl;
-        // std::cout << "average = " << average << std::endl;
-        // std::cout << "scale = " << scale << std::endl;
-
-        if(scale >= 1.2 && scale < 2)
+        if(scale >= options.semi_super_individual_threshold && scale < options.super_individual_threshold)
             semi_super_individuals++;
-        else if(scale >= 2)
+        else if(scale >= options.super_individual_threshold)
             super_individuals++;
 
         if(convergence < scale)
@@ -373,8 +397,8 @@ void Population::stats()
         }
     }
 
-    //TEST
-    // std::cout << "convergence = " << convergence << std::endl;
+    total_super_individuals += super_individuals;
+    total_semi_super_individuals += semi_super_individuals;
 }
 
 //NEEDS TO BE UPDATED WITH IF STATEMENTS RATHER THAN ? STATEMENS, LIKE IN stats() ABOVE
@@ -398,7 +422,7 @@ void Population::stats_o()
 }
 
 //SET OPTION = 1 IF AVERAGING IS NOT REQUIRED
-void Population::report(int generation, int option)
+void Population::report(int generation, int option, int total_super_individuals, int total_semi_super_individuals)
 {
     //TEST
     // char temp;
@@ -412,8 +436,8 @@ void Population::report(int generation, int option)
         std::ofstream out(options.output_file, std::ios::app);
         out << std::fixed << std::setprecision(options.print_precision) << add_whitespace(generation, options.max_generations, true)
                 << generation << ",\t\t" << min << ",\t\t" << average << ",\t\t" << max
-                    << ",\t\t" << std::setprecision(5) << convergence << ",\t" << semi_super_individuals << ",\t\t\t" << super_individuals
-                        << ",\t\t\t" << std::setprecision(options.print_precision) << 1.5 * (members[max_fitness_member_index].get_dimensions()[0] + options.living_width_offset)
+                    << ",\t\t" << std::setprecision(5) << convergence << ",\t" << semi_super_individuals << ",\t\t\t" << super_individuals << ",\t\t\t" << total_semi_super_individuals << ",\t\t\t" << total_super_individuals
+                        << ",\t\t\t\t" << std::setprecision(options.print_precision) << 1.5 * (members[max_fitness_member_index].get_dimensions()[0] + options.living_width_offset)
                             << ",\t\t" << members[max_fitness_member_index].get_dimensions()[0] + options.living_width_offset
                                 << ",\t\t" << 1.5* pow(members[max_fitness_member_index].get_dimensions()[0] + options.living_width_offset, 2)
                                     << ",\t\t" << members[max_fitness_member_index].get_dimensions()[1] + options.kitchen_length_offset
@@ -498,38 +522,6 @@ void Population::report_o(int generation, int option)
 
 void Population::generation(Population*& child, int srand_offset)
 {
-    //TEST
-    // std::cout << "POP::GEN(): Gen = " << srand_offset << std::endl;
-    // std::cout << "POP::GEN(): sum fitness = " << sum_fitness << std::endl << std::endl;
-    // std::cout << "POP::GEN(): members[0].print_ind() = "; members[0].print_ind(); std::cout << "fitness = " << members[0].get_fitness() << std::endl << std::endl;
-    // std::cout << "POP::GEN(): members[1].print_ind() = "; members[1].print_ind(); std::cout << "fitness = " << members[1].get_fitness() << std::endl << std::endl;
-    // std::cout << "POP::GEN(): members[2].print_ind() = "; members[2].print_ind(); std::cout << "fitness = " << members[2].get_fitness() << std::endl << std::endl;
-    // std::cout << "POP::GEN(): members[3].print_ind() = "; members[3].print_ind(); std::cout << "fitness = " << members[3].get_fitness() << std::endl << std::endl;
-
-    // if(parent_1 != nullptr)
-    // {
-    //     delete parent_1;
-    //     parent_1 = nullptr;
-    // }
-
-    // if(parent_2 != nullptr)
-    // {
-    //     delete parent_2;
-    //     parent_2 = nullptr;
-    // }
-
-    // if(child_1 != nullptr)
-    // {
-    //     delete child_1;
-    //     child_1 = nullptr;
-    // }
-
-    // if(child_2 != nullptr)
-    // {
-    //     delete child_2;
-    //     child_2 = nullptr;
-    // }
-
     int parent_index_1 = 0;
     int parent_index_2 = 0;
     int child_index_1 = 0;
@@ -541,8 +533,8 @@ void Population::generation(Population*& child, int srand_offset)
     {   
         parent_index_1 = proportional_selection(srand_offset*options.population_size + i);
 
+        // THE FOLLOWING LOOP STOPS ASEXUAL SELECTION
         // ADDED THE k OFFSET FOR SRAND() BECAUSE OCCASIONALLY GETTING HELD UP IN THIS LOOP, PROBABLY DUE TO TIME(NULL) SEED
-        // THIS LOOP STOPS ASEXUAL SELECTION
         int k = 0;
         while(parent_index_2 == parent_index_1)
         {
@@ -553,104 +545,36 @@ void Population::generation(Population*& child, int srand_offset)
         child_index_1 = i;
         child_index_2 = i+1;
 
-        //POINTER VERSION
         parent_1 = &members[parent_index_1];
         parent_2 = &members[parent_index_2];
         
-        //POINTER VERSION
         child_1 = &(child->members[child_index_1]);
         child_2 = &(child->members[child_index_2]);
 
-        //UNIT TEST OBJECTS
+        // UNIT TEST: STRING EQUIVALENCE OBJECTS
         Individual test_1_p1(*parent_1);
         Individual test_2_p2(*parent_2);
 
         xover_mutate(parent_1, parent_2, child_1, child_2, srand_offset*options.population_size + i);
 
-        //UNIT TESTING
+        // UNIT TEST: STRING EQUIVALENCE
         verify_string_equivalence(parent_1, &test_1_p1, "POP::GENERATION, AFTER AFTER XOVER_MUTATE CALL");
         verify_string_equivalence(parent_2, &test_2_p2, "POP::GENERATION, AFTER AFTER XOVER_MUTATE CALL");
 
-        // child_1->get_transform_data()[options.m_isParent_index] = 0;
-        // child_2->get_transform_data()[options.m_isParent_index] = 0;
-        // child_1->get_transform_data()[options.m_parent_1_index] = parent_index_1;
-        // child_1->get_transform_data()[options.m_parent_2_index] = parent_index_2;
-        // child_2->get_transform_data()[options.m_parent_1_index] = parent_index_2;
-        // child_2->get_transform_data()[options.m_parent_2_index] = parent_index_1;
-        child_1->set_transform_data_by_element(options.m_isParent_index, 0);
-        child_2->set_transform_data_by_element(options.m_isParent_index, 0);
-        child_1->set_transform_data_by_element(options.m_parent_1_index, parent_index_1);
-        child_1->set_transform_data_by_element(options.m_parent_2_index, parent_index_2);
-        child_2->set_transform_data_by_element(options.m_parent_1_index, parent_index_2);
-        child_2->set_transform_data_by_element(options.m_parent_2_index, parent_index_1);
-
-        //TEST
-        std::cout << "\nPOP::GEN: BEFORE SETTING CHILD->TRANSFORM_DATA: MUTATE DATA\n";
-        for(int j = 0; j < child_1->get_mutate_count(); j++)
-        {
-            if(j == 0)
-                std::cout << "CHILD ["<<i<<"] MUTATE DATA: " << child_1->get_mutate_data()[j] << " ";
-            else
-                std::cout << child_1->get_mutate_data()[j] << " ";
-        }
-        std::cout << std::endl;
-        for(int j = 0; j < child_2->get_mutate_count(); j++)
-        {
-            if(j == 0)
-                std::cout << "CHILD ["<<i+1<<"] MUTATE DATA: " << child_2->get_mutate_data()[j] << " ";
-            else
-                std::cout << child_2->get_mutate_data()[j] << " ";
-        }
-        std::cout << std::endl;
-        std::cout << std::endl;
+        child_1->get_transform_data()[options.m_isParent_index] = 0;
+        child_2->get_transform_data()[options.m_isParent_index] = 0;
+        child_1->get_transform_data()[options.m_parent_1_index] = parent_index_1;
+        child_1->get_transform_data()[options.m_parent_2_index] = parent_index_2;
+        child_2->get_transform_data()[options.m_parent_1_index] = parent_index_2;
+        child_2->get_transform_data()[options.m_parent_2_index] = parent_index_1;
 
         for(int j = 0; j < child_1->get_mutate_count(); j++)
-        {
-            // child_1->get_transform_data()[j + options.m_meta_length] = child_1->get_mutate_data()[j];
-            int temp = child_1->get_mutate_data()[j];
-            child_1->set_transform_data_by_element(j + options.m_meta_length, temp);
-            // add_dynamic_element_to_end(child_1->get_transform_data(),child_1->get_transform_data()[0],temp);
-            child_1->get_transform_data()[0]++;
-        }
-
+            child_1->get_transform_data()[j + options.m_meta_length] = child_1->get_mutate_data()[j];
         for(int j = 0; j < child_2->get_mutate_count(); j++)
-        {
-            // child_2->get_transform_data()[j + options.m_meta_length] = child_2->get_mutate_data()[j];
-            int temp = child_2->get_mutate_data()[j];
-            child_2->set_transform_data_by_element(j + options.m_meta_length, temp);
-        }
-
-        //TEST
-        std::cout << "POP::GEN: CHILD 1 TRANSFORM DATA LENGTH = " << child_1->get_transform_data()[0] << std::endl;
-        std::cout << "POP::GEN: CHILD 2 TRANSFORM DATA LENGTH = " << child_2->get_transform_data()[0] << std::endl;
+            child_2->get_transform_data()[j + options.m_meta_length] = child_2->get_mutate_data()[j];
 
         set_child_transform_data_by_row(child_1->get_transform_data(), i);
         set_child_transform_data_by_row(child_2->get_transform_data(), i + 1);
-
-        //TEST
-        std::cout << "\nPOP::GEN: AFTER SETTING CHILD TRANSFORM DATA\n";
-        // std::cout << "POP::GEN: POP::CHILD["<<i<<"] TRANSFORM DATA LENGTH = " << get_child_transform_data()[i][0] << std::endl;
-        // std::cout << "POP::GEN: POP::CHILD["<<i+1<<"] TRANSFORM DATA LENGTH = " << get_child_transform_data()[i+1][0] << std::endl;
-        for(int j = 0; j < get_child_transform_data()[i][0]; j++)
-        {
-            if(j == 0)
-                std::cout << "CHILD ["<<i<<"]: " << get_child_transform_data()[i][j] << " ";
-            else if(j < get_child_transform_data()[i][0] - 1)
-                std::cout << get_child_transform_data()[i][j] << " ";
-            else
-                std::cout << get_child_transform_data()[i][j] << std::endl;
-        }
-        for(int j = 0; j < get_child_transform_data()[i+1][0]; j++)
-        {
-            if(j == 0)
-                std::cout << "CHILD ["<<i+1<<"]: " << get_child_transform_data()[i+1][j] << " ";
-            else if(j < get_child_transform_data()[i+1][0] - 1)
-                std::cout << get_child_transform_data()[i+1][j] << " ";
-            else
-                std::cout << get_child_transform_data()[i+1][j] << std::endl;
-        }
-        std::cout << std::endl;
-        std::cout << std::endl;
 
         parent_1 = nullptr;
         parent_2 = nullptr;
@@ -669,16 +593,6 @@ int Population::proportional_selection(int srand_offset)
     for(int i = 1; i < options.population_size; i++)
         limits[i] = limits[i-1] + members[i].get_fitness()/sum_fitness;
 
-    // //TEST
-    // for(int i = 0; i < options.population_size; i++)
-    // {
-    //     if(i == 0)
-    //         std::cout << "limits["<<i<<"] = " << limits[i] <<" ";
-    //     else
-    //         std::cout << limits[i] <<" ";
-    // }
-    // std::cout << std::endl;
-
     for(int i = 0; i < options.population_size; i++)
     {
         if(random_fraction <= limits[i])
@@ -690,72 +604,29 @@ int Population::proportional_selection(int srand_offset)
 
 void Population::xover_mutate(Individual* parent_1, Individual* parent_2, Individual* child_1, Individual* child_2, int srand_offset)
 {
-    // Individual temp_parent_1(*parent_1);
-    // Individual temp_parent_2(*parent_2);
-    //FOR UNIT TEST
+    // UNIT TEST: STRING EQUIVALENCE OBJECTS
     Individual test_1_p1(*parent_1);
     Individual test_2_p2(*parent_2);
-    //TEST
-    // std::cout << "POP::XOVER_MUTATE: Before child = parent" << std::endl;
-    // std::cout << "parent_1 =  "; parent_1->print_ind();
-    // std::cout << "parent_2 =  "; parent_2->print_ind();
-    // std::cout << "test_1_p1 = "; test_1_p1.print_ind();
-    // std::cout << "test_2_p2 = "; test_2_p2.print_ind();
-    // std::cout << "child_1 =  "; child_1->print_ind();
-    // std::cout << "child_2 =  "; child_2->print_ind();
-    // std::cout << std::endl;
    
     for(int i = 0; i < options.chromosome_length; i++)
     {
         child_1->get_chromosome()[i] = parent_1->get_chromosome()[i];
         child_2->get_chromosome()[i] = parent_2->get_chromosome()[i];
-        // child_1->get_chromosome()[i] = temp_parent_1.get_chromosome()[i];
-        // child_2->get_chromosome()[i] = temp_parent_2.get_chromosome()[i];
     }
 
-    //TEST
-    // std::cout << "POP::XOVER_MUTATE: After child = parent" << std::endl;
-    // std::cout << "parent_1 =  "; parent_1->print_ind();
-    // std::cout << "parent_2 =  "; parent_2->print_ind();
-    // std::cout << "test_1_p1 = "; test_1_p1.print_ind();
-    // std::cout << "test_2_p2 = "; test_2_p2.print_ind();
-    // std::cout << "child_1 =  "; child_1->print_ind();
-    // std::cout << "child_2 =  "; child_2->print_ind();
-    // std::cout << std::endl;
-
+    // UNIT TESTS: STRING EQUIVALENCE
     verify_string_equivalence(parent_1, &test_1_p1, "POP::XOVER_MUTATE, AFTER SETTING CHILD = PARENT");
     verify_string_equivalence(parent_2, &test_2_p2, "POP::XOVER_MUTATE, AFTER SETTING CHILD = PARENT");
 
-    //REAL
     int index = -1;
     if(flip(options.probability_x, options.random_seed, srand_offset))
         index = one_point_xover(parent_1, parent_2, child_1, child_2, srand_offset);
 
-    //REAL
     child_1->mutate(options.probability_mutation, options.random_seed, srand_offset);
     child_2->mutate(options.probability_mutation, options.random_seed, srand_offset + rand());
 
-    //ADD IF !nullptr DELETE STATEMENT FOR CHILD->TRANSFORM_DATA
-    // if(child_1->get_transform_data() != nullptr)
-    // {
-    //     delete[] child_1->get_transform_data();
-    //     child_1->get_transform_data() = nullptr;
-    // }
-    // if(child_2->get_transform_data() != nullptr)
-    // {
-    //     delete[] child_2->get_transform_data();
-    //     child_2->get_transform_data() = nullptr;
-    // }
-
-    //REAL
-    // int child_1_transform_array_length = options.m_meta_length + child_1->get_mutate_count();
-    // int child_2_transform_array_length = options.m_meta_length + child_2->get_mutate_count();
-    //TEST
-    int child_1_transform_array_length = options.m_meta_length;
-    int child_2_transform_array_length = options.m_meta_length;
-
-    child_1->init_transform_array(child_1_transform_array_length);
-    child_2->init_transform_array(child_2_transform_array_length);
+    int child_1_transform_array_length = options.m_meta_length + child_1->get_mutate_count();
+    int child_2_transform_array_length = options.m_meta_length + child_2->get_mutate_count();
 
     child_1->get_transform_data()[0] = child_1_transform_array_length;
     child_2->get_transform_data()[0] = child_2_transform_array_length;
@@ -778,9 +649,8 @@ int Population::one_point_xover(Individual*& parent_1, Individual*& parent_2, In
 }
 
 
-void Population::CHC_generation(Population* child)
+void Population::CHC_generation(Population* child, Population *temp)
 {
-    Population *temp = new Population(options);
     int index = -1;
     for(int j = 0; j < options.population_size; j++)
     {
@@ -807,14 +677,18 @@ void Population::CHC_generation(Population* child)
 
         if(index < options.population_size)
         {
-            temp->members[j].copy_individual_data(members[index]);
+             temp->members[j] = members[index];
+            // temp->members[j].copy_individual_data(members[index]);
+            // temp->members[j].set_dimensions(members[index].get_dimensions(),members[index].get_dimension_count());
             temp->set_transform_data_by_row(transform_data[index],j);
             temp->transform_data[j][options.m_isParent_index] = 1;
             members[index].set_fitness(-1);
         }
         else
         {
-            temp->members[j].copy_individual_data(child->members[index - options.population_size]);
+            temp->members[j] = child->members[index - options.population_size];
+            // temp->members[j].copy_individual_data(child->members[index - options.population_size]);
+            // temp->members[j].set_dimensions(child->members[index - options.population_size].get_dimensions(), child->members[index - options.population_size].get_dimension_count());
             temp->set_transform_data_by_row(child_transform_data[index - options.population_size],j);
             child->members[index - options.population_size].set_fitness(-1);
         }
@@ -828,78 +702,13 @@ void Population::CHC_generation(Population* child)
     //TEST
     // std::cout << "POP::CHC(END): after child copy temp" << std::endl;
     // std::cout << "POP::CHC(END): child members" << std::endl;
+    
+    // UNIT TESTS: STRING EQUIVALENCE
     for(int i = 0; i < options.population_size; i++)
     {
         verify_string_equivalence(&child->get_members()[i], &temp->get_members()[i], "CHC TEST FOR CHILD = TEMP");
     }
-    // char temp_c;
-    // std::cin >> temp_c;
-
 }
-// void Population::CHC_generation(Population* child)
-// {
-//     Population temp(options);
-//     int index = -1;
-//     for(int j = 0; j < options.population_size; j++)
-//     {
-//         double fitness = 0;
-//         for(int i = 0; i < options.population_size*2; i++)
-//         {
-//             if(i < options.population_size)
-//             {
-//                 if(members[i].get_fitness() >= fitness)
-//                 {
-//                     fitness = members[i].get_fitness();
-//                     index = i;
-//                 }
-//             }
-//             else
-//             {
-//                 if(child->members[i - options.population_size].get_fitness() >= fitness)
-//                 {
-//                     fitness = child->members[i - options.population_size].get_fitness();
-//                     index = i;
-//                 }
-//             }
-//         }
-
-//         if(index < options.population_size)
-//         {
-//             temp.members[j] = members[index];
-//             for(int i = 0; i < transform_data[j][0]; i++)
-//             {
-//                 temp.transform_data[j][i] = transform_data[index][i];
-//             }
-//             temp.transform_data[j][options.m_isParent_index] = 1;
-//             members[index].set_fitness(-1);
-//         }
-//         else
-//         {
-//             temp.members[j] = child->members[index - options.population_size];
-//             for(int i = 0; i < child_transform_data[j][0]; i++)
-//             {
-//                 temp.transform_data[j][i] = child_transform_data[index - options.population_size][i];
-//             }
-//             child->members[index - options.population_size].set_fitness(-1);
-//         }
-//     }
-
-//     // child = temp;
-//     // delete child;
-//     // child = new Population(options);
-//     child->copy_population(temp);
-
-//     //TEST
-//     std::cout << "POP::CHC(END): after child copy temp" << std::endl;
-//     std::cout << "POP::CHC(END): child members" << std::endl;
-//     for(int i = 0; i < options.population_size; i++)
-//     {
-//         verify_string_equivalence(&child->get_members()[i], &temp.get_members()[i], "CHC TEST FOR CHILD = TEMP");
-//     }
-//     // char temp_c;
-//     // std::cin >> temp_c;
-
-// }
 
 //TEST
 void Population::print_pop()
@@ -918,12 +727,12 @@ void Population::print_xover_mut_data()
     {
         for(int i = 0; i < options.population_size; i++)
         {
-            for(int j = 0; j < get_transform_data()[i][0]; j++)
+            for(int j = 0; j < get_transform_data(i)[0]; j++)
             {
                 if(j == 0)
-                    std::cout << "MEM_" << i << ": " << get_transform_data()[i][j] << " ";
+                    std::cout << "MEM_" << i << ": " << get_transform_data(i)[j] << " ";
                 else
-                    std::cout << get_transform_data()[i][j] << " ";
+                    std::cout << get_transform_data(i)[j] << " ";
             }
             std::cout << std::endl;
         }

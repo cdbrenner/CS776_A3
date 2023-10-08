@@ -19,15 +19,17 @@ struct Options
     int max_generations;
     double probability_x;
     double probability_mutation;
-    double convergence_resolution;
+    double convergence_resolution_threshold;
     int extinction_interval;
+    int super_individual_threshold;
+    int semi_super_individual_threshold;
     
     //INDIVIDUAL::TRANSFORM_DATA INDICES
     int m_isParent_index = 1; // USED IN CHC TO TELL WHETHER COMPARISON IS MADE TO GRANDPARENT (1) OR CHILD (0)
     int m_parent_1_index = 2;
     int m_parent_2_index = 3;
     int m_xover_index = 4;
-    int m_meta_length = 5; // NUMBER OF ELEMENTS BEFORE ATTACHING MUTATE DATA
+    int m_meta_length = m_xover_index + 1; // NUMBER OF ELEMENTS BEFORE ATTACHING MUTATE DATA
 
     //FLOORPLANNING OPTIONS START HERE
         int variable_count;

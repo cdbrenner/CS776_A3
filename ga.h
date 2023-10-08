@@ -11,6 +11,8 @@ class GA
         Population *m_temp = nullptr;
         Options options;
         int extinction_counter;
+        int total_super_individuals = 0;
+        int total_semi_super_individuals = 0;
 
         //IN ORDER TO RUN XOVER_MUTATION MECHANISM TEST IN CHC MODEL, A GRANDPARENT IS REQUIRED
         Population *grandparent = nullptr;
@@ -23,9 +25,11 @@ class GA
 
         void init(int eval_option, int report_option);
         void run(int eval_option, int report_option);
-        void extinction_check();
-        void extinction_event();
+        bool extinction_check(int eval_option, int random_seed, int srand_offset);
+        bool extinction_event(int eval_option, int random_seed, int srand_offset);
         void report_cleanup();
 
         const Options get_options();
+
+        void print_population_data();
 };

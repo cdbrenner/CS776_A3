@@ -20,7 +20,6 @@ Individual::Individual(const Individual& rhs)
 
     if(chromosome_length != 0)
     {
-        chromosome = new int[chromosome_length];
         for(int i = 0; i < chromosome_length; i++)
             chromosome[i] = rhs.chromosome[i];
     }
@@ -31,7 +30,6 @@ Individual::Individual(const Individual& rhs)
 
     if(dimension_count != 0)
     {
-        dimensions = new double[dimension_count];
         for(int i = 0; i < dimension_count; i++)
         {
             dimensions[i] = rhs.dimensions[i];
@@ -39,28 +37,7 @@ Individual::Individual(const Individual& rhs)
     }
 }
 
-Individual::~Individual()
-{
-    if(chromosome != nullptr)
-        delete[] chromosome;
-
-    if(dimensions != nullptr)
-        delete[] dimensions;
-
-    // if(mutate_data != nullptr)
-    // {
-    //     //TEST
-    //     // std::cout << "DESTRUCTOR: DELETE MUTATA_DATA" << std::endl;
-    //     delete[] mutate_data;
-    // }
-
-    if(transform_data != nullptr)
-    {
-        //TEST
-        // std::cout << "DESTRUCTOR: DELETE transform_data" << std::endl;
-        delete[] transform_data;
-    }
-}
+Individual::~Individual() {}
 
 void Individual::set_chromosome_length(int length)
 {
@@ -85,17 +62,11 @@ void Individual::set_objective_value(double objective_value)
 void Individual::set_dimensions(double* data, int count)
 {
     dimension_count = count;
-    dimensions = new double[count];
 
     for(int i = 0; i < count; i++)
     {
         dimensions[i] = data[i];
     }
-}
-
-void Individual::set_transform_data_by_element(int index, int value)
-{
-    add_dynamic_element_to_end(transform_data,index+1,value);
 }
 
 int* Individual::get_chromosome()
@@ -118,7 +89,7 @@ int Individual::get_mutate_count()
     return mutate_count;
 }
 
-int*& Individual::get_transform_data()
+int* Individual::get_transform_data()
 {
     return transform_data;
 }
@@ -145,44 +116,18 @@ double* Individual::get_dimensions()
 
 void Individual::init(int random_seed, int srand_offset)
 {
-    chromosome = new int[chromosome_length];
     for(int i = 0; i < chromosome_length; i++)
     {
         chromosome[i] = flip(0.5f, random_seed, srand_offset*chromosome_length + i);
     }
 
-    transform_data = new int[1]{1};
+    transform_data[0] = 1;
 }
 
-void Individual::init_chromosome_array(int length)
-{
-    chromosome_length = length;
-    
-    if(chromosome == nullptr)
-        chromosome = new int[length];
-}
-
-void Individual::init_transform_array(int length)
-{
-    transform_data_length = length;
-    
-    if(chromosome == nullptr)
-        transform_data = new int[length];
-}
 
 void Individual::mutate(double probability, int random_seed, int srand_offset)
 {
-
     mutate_count = 0;
-    // if(mutate_data != nullptr)
-    // {
-    //     //TEST
-    //     // std::cout << "INSIDE DYNAMIC DELETE" << std::endl;
-
-    //     delete[] mutate_data;
-    //     mutate_data = nullptr;
-    // }
-    // int mutation_data_length;
 
     for(int i = 0; i < chromosome_length; i++)
     {
@@ -193,9 +138,6 @@ void Individual::mutate(double probability, int random_seed, int srand_offset)
             mutate_count++;
         }
     }
-
-    //TEST
-    // std::cout << "CHROM LENGTH: " << get_chromosome_length() << std::endl; 
 }
 
 void Individual::copy_individual_data(const Individual& rhs)
@@ -210,7 +152,6 @@ void Individual::copy_individual_data(const Individual& rhs)
 
 }
 
-//TEST
 void Individual::print_ind()
 {
     // int one = 0;
@@ -248,4 +189,13 @@ void Individual::print_transform_data()
 // double Individual::get_mutation_percentage()
 // {
 //     return mutation_count/total_mutation_attempts;
+// }
+
+// void Individual::fixed_low_fitness_init()
+// {
+//     for(int i = 0; i < chromosome_length - 1; i++)
+//     {
+//             chromosome[i] = 0;
+//     }
+//     chromosome[chromosome_length - 1] = 1;
 // }
