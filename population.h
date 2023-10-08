@@ -9,6 +9,7 @@
 class Population
 {
     private:
+    //TEST
         Options options;
         Individual* members = nullptr;
         // Individual *parent_1 = nullptr;
