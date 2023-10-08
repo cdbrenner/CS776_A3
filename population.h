@@ -44,6 +44,7 @@ class Population
         void copy_population(const Population& population_copy);
         void set_transform_data_by_row(int* transform_data_row, int row);
         void set_child_transform_data_by_row(int* child_transform_data, int row);
+        void reset_super_individual_count();
 
         Individual* get_members();
         int* get_transform_data(int row);
@@ -63,9 +64,9 @@ class Population
 
         void evaluate(int choice, int choice_2, int random_seed, int srand_offset);
         void evaluate_o(int choice, int choice_2, int random_seed, int srand_offset);
-        void stats(int total_super_individuals, int total_semi_super_individuals);
+        void stats(int& total_super_individuals, int& total_semi_super_individuals);
         void stats_o();
-        void report(int generation, int option, int total_super_individuals, int total_semi_super_individuals);
+        void report(int generation, int option, int total_super_individuals, int total_semi_super_individuals, bool extinction_event);
         void report_o(int generation, int option); // HASN'T BEEN UPDATED FOR FLOORPLANNING WHATSOEVER
         void generation(Population*& child, int srand_offset);
         void CHC_generation(Population* child, Population *temp);

@@ -1,8 +1,9 @@
 //TESTS IN SETUP_OPTIONS(), EXTNCTION_CHECK(), EXTINCTION_EVENT()
 #include "ga.h"
 
-GA::GA(int argc, char *argv[], int eval_option, int iterator)
+GA::GA(int argc, char *argv[], int eval_option, int iterator, int ga_variant)
 {
+    m_ga_variant = ga_variant;
     setup_options(argc, argv, eval_option, iterator);
 }
 
@@ -16,38 +17,16 @@ GA::~GA()
 
     if(options.max_variable_value != nullptr)
         delete options.max_variable_value;
-
-    // if(grandparent != nullptr)
-    //     delete grandparent;
-
-    // if(parent != nullptr)
-    //     delete parent;
-
-    // if(child != nullptr)
-    //     delete child;
-
-    // if(m_temp != nullptr)
-    //     delete m_temp;
 }
 
 void GA::setup_options(int argc, char *argv[], int eval_option, int iterator)
 {
-    std::stringstream ss1;
-    std::stringstream ss2;
-    std::string temp1;
-    std::string temp2;
-    int previous_iterator = iterator - 1;
-    ss1 << iterator;
-    ss1 >> temp1;
-    ss2 << previous_iterator;
-    ss2 >> temp2;
-
     options.GA_iteration = iterator;
     options.random_seed = time(NULL) + iterator;
-    options.extinction_interval = 1;
+    options.extinction_delay = 1;
     options.convergence_resolution_threshold = 0.0015;
-    options.super_individual_threshold = 1.004;
-    options.semi_super_individual_threshold = 1.002;
+    options.super_individual_threshold = 2;
+    options.semi_super_individual_threshold = 1.2;
     
     //FLOORPLANNING
     options.penalty_weight_1 = 2;
@@ -101,81 +80,81 @@ void GA::setup_options(int argc, char *argv[], int eval_option, int iterator)
 
     switch(eval_option)
     {
-        case 1:
-            options.chromosome_length = 27;
-            options.population_size = 50;
-            options.max_generations = 100;
-            options.probability_mutation = 0.001;
-            options.probability_x = 0.9;
-            options.input_file = "output_deJong_F1_" + temp2 + ".txt";
-            options.input_file_o = "output_deJong_F1_O_" + temp2 + ".txt";
-            options.output_file = "output_deJong_F1_" + temp1 + ".txt";
-            options.output_file_o = "output_deJong_F1_O_" + temp1 + ".txt";
-            options.ave_file = "output_deJong_F1_AVE.txt";
-            options.ave_file_o = "output_deJong_F1_O_AVE.txt";
-            options.print_precision = 2;
-            options.print_precision_o = 5;
-            break;
-        case 2:
-            options.chromosome_length = 22;
-            options.population_size = 50;
-            options.max_generations = 100;
-            options.probability_mutation = 0.05;
-            options.probability_x = 0.99;
-            options.input_file = "output_deJong_F2_" + temp2 + ".txt";
-            options.input_file_o = "output_deJong_F2_O_" + temp2 + ".txt";
-            options.output_file = "output_deJong_F2_" + temp1 + ".txt";
-            options.output_file_o = "output_deJong_F2_O_" + temp1 + ".txt";
-            options.ave_file = "output_deJong_F2_AVE.txt";
-            options.ave_file_o = "output_deJong_F2_O_AVE.txt";
-            options.print_precision = 2;
-            options.print_precision_o = 5;
-            break;
-        case 3:
-            options.chromosome_length = 45;
-            options.population_size = 500;
-            options.max_generations = 1000;
-            options.probability_mutation = 0.05;
-            options.probability_x = .9;
-            options.input_file = "output_deJong_F3_" + temp2 + ".txt";
-            options.input_file_o = "output_deJong_F3_O_" + temp2 + ".txt";
-            options.output_file = "output_deJong_F3_" + temp1 + ".txt";
-            options.output_file_o = "output_deJong_F3_O_" + temp1 + ".txt";
-            options.ave_file = "output_deJong_F3_AVE.txt";
-            options.ave_file_o = "output_deJong_F3_O_AVE.txt";
-            options.print_precision = 2;
-            options.print_precision_o = 2;
-            break;
-        case 4:
-            options.chromosome_length = 210;
-            options.population_size = 500;
-            options.max_generations = 1000;
-            options.probability_mutation = 0.05;
-            options.probability_x = 0.99;
-            options.input_file = "output_deJong_F4_" + temp2 + ".txt";
-            options.input_file_o = "output_deJong_F4_O_" + temp2 + ".txt";
-            options.output_file = "output_deJong_F4_" + temp1 + ".txt";
-            options.output_file_o = "output_deJong_F4_O_" + temp1 + ".txt";
-            options.ave_file = "output_deJong_F4_AVE.txt";
-            options.ave_file_o = "output_deJong_F4_O_AVE.txt";
-            options.print_precision = 5;
-            options.print_precision_o = 2;
-            break;
-        case 5:
-            options.chromosome_length = 32;
-            options.population_size = 50;
-            options.max_generations = 100;
-            options.probability_mutation = 0.05;
-            options.probability_x = 0.99;
-            options.input_file = "output_deJong_F5" + temp2 + ".txt";
-            options.input_file_o = "output_deJong_F5_O_" + temp2 + ".txt";
-            options.output_file = "output_deJong_F5" + temp1 + ".txt";
-            options.output_file_o = "output_deJong_F5_O_" + temp1 + ".txt";
-            options.ave_file = "output_deJong_F5_AVE.txt";
-            options.ave_file_o = "output_deJong_F5_O_AVE.txt";
-            options.print_precision = 5;
-            options.print_precision_o = 5;
-            break;
+        // case 1:
+        //     options.chromosome_length = 27;
+        //     options.population_size = 50;
+        //     options.max_generations = 100;
+        //     options.probability_mutation = 0.001;
+        //     options.probability_x = 0.9;
+        //     options.input_file = "output_deJong_F1_" + temp2 + ".txt";
+        //     options.input_file_o = "output_deJong_F1_O_" + temp2 + ".txt";
+        //     options.output_file = "output_deJong_F1_" + temp1 + ".txt";
+        //     options.output_file_o = "output_deJong_F1_O_" + temp1 + ".txt";
+        //     options.ave_file = "output_deJong_F1_AVE.txt";
+        //     options.ave_file_o = "output_deJong_F1_O_AVE.txt";
+        //     options.print_precision = 2;
+        //     options.print_precision_o = 5;
+        //     break;
+        // case 2:
+        //     options.chromosome_length = 22;
+        //     options.population_size = 50;
+        //     options.max_generations = 100;
+        //     options.probability_mutation = 0.05;
+        //     options.probability_x = 0.99;
+        //     options.input_file = "output_deJong_F2_" + temp2 + ".txt";
+        //     options.input_file_o = "output_deJong_F2_O_" + temp2 + ".txt";
+        //     options.output_file = "output_deJong_F2_" + temp1 + ".txt";
+        //     options.output_file_o = "output_deJong_F2_O_" + temp1 + ".txt";
+        //     options.ave_file = "output_deJong_F2_AVE.txt";
+        //     options.ave_file_o = "output_deJong_F2_O_AVE.txt";
+        //     options.print_precision = 2;
+        //     options.print_precision_o = 5;
+        //     break;
+        // case 3:
+        //     options.chromosome_length = 45;
+        //     options.population_size = 500;
+        //     options.max_generations = 1000;
+        //     options.probability_mutation = 0.05;
+        //     options.probability_x = .9;
+        //     options.input_file = "output_deJong_F3_" + temp2 + ".txt";
+        //     options.input_file_o = "output_deJong_F3_O_" + temp2 + ".txt";
+        //     options.output_file = "output_deJong_F3_" + temp1 + ".txt";
+        //     options.output_file_o = "output_deJong_F3_O_" + temp1 + ".txt";
+        //     options.ave_file = "output_deJong_F3_AVE.txt";
+        //     options.ave_file_o = "output_deJong_F3_O_AVE.txt";
+        //     options.print_precision = 2;
+        //     options.print_precision_o = 2;
+        //     break;
+        // case 4:
+        //     options.chromosome_length = 210;
+        //     options.population_size = 500;
+        //     options.max_generations = 1000;
+        //     options.probability_mutation = 0.05;
+        //     options.probability_x = 0.99;
+        //     options.input_file = "output_deJong_F4_" + temp2 + ".txt";
+        //     options.input_file_o = "output_deJong_F4_O_" + temp2 + ".txt";
+        //     options.output_file = "output_deJong_F4_" + temp1 + ".txt";
+        //     options.output_file_o = "output_deJong_F4_O_" + temp1 + ".txt";
+        //     options.ave_file = "output_deJong_F4_AVE.txt";
+        //     options.ave_file_o = "output_deJong_F4_O_AVE.txt";
+        //     options.print_precision = 5;
+        //     options.print_precision_o = 2;
+        //     break;
+        // case 5:
+        //     options.chromosome_length = 32;
+        //     options.population_size = 50;
+        //     options.max_generations = 100;
+        //     options.probability_mutation = 0.05;
+        //     options.probability_x = 0.99;
+        //     options.input_file = "output_deJong_F5" + temp2 + ".txt";
+        //     options.input_file_o = "output_deJong_F5_O_" + temp2 + ".txt";
+        //     options.output_file = "output_deJong_F5" + temp1 + ".txt";
+        //     options.output_file_o = "output_deJong_F5_O_" + temp1 + ".txt";
+        //     options.ave_file = "output_deJong_F5_AVE.txt";
+        //     options.ave_file_o = "output_deJong_F5_O_AVE.txt";
+        //     options.print_precision = 5;
+        //     options.print_precision_o = 5;
+        //     break;
         case 6:
             options.chromosome_length = 0;
             for(int i = 0; i < options.variable_count; i++)
@@ -187,12 +166,9 @@ void GA::setup_options(int argc, char *argv[], int eval_option, int iterator)
             //OPTIONS CANNOT EQUAL ODD NUMBER OR SEGMENT FAULT!!!
             options.population_size = 500;
             options.max_generations = 5000;
-            options.probability_mutation = 0.6;
+            options.probability_mutation = 0.5;
             options.probability_x = 0.99;
-            options.input_file = "output_floorPlanning_" + temp2 + ".txt";
-            options.input_file_o = "output_floorPlanning_" + temp2 + "_ObjFnc.txt";
-            options.output_file = "output_floorPlanning_" + temp1 + ".txt";
-            options.output_file_o = "output_floorPlanning_" + temp1 + "_ObjFnc.txt";
+            
             options.ave_file = "output_floorPlanning_AVE.txt";
             options.ave_file_o = "output_floorPlanning_AVE_ObjFnc.txt";
             options.print_precision = 2;
@@ -201,12 +177,75 @@ void GA::setup_options(int argc, char *argv[], int eval_option, int iterator)
     }
 }
 
+void GA::set_option_xover_prob(double xover_probability)
+{
+    options.probability_x = xover_probability;
+}
+
+void GA::set_option_mutation_prob(double mutation_probability)
+{
+    options.probability_mutation = mutation_probability;
+}
+
+void GA::set_option_extinction_delay(double count)
+{
+    options.extinction_delay = count;
+}
+
+void GA::set_option_convergence_resolution_threshold(double threshold)
+{
+    options.convergence_resolution_threshold = threshold;
+}
+
+void GA::set_option_ga_variant_name(std::string name)
+{
+    options.ga_variant_name = name;
+}
+
+void GA::set_option_input_file(std::string run_number)
+{
+    options.input_file = "output_floorPlanning_" + run_number + "_" + options.ga_variant_name + ".txt";
+}
+
+void GA::set_option_input_file_o(std::string run_number)
+{
+    options.input_file_o = "output_floorPlanning_" + run_number + "_" + options.ga_variant_name + "_ObjFnc.txt";
+}
+
+void GA::set_option_output_file(std::string run_number)
+{
+    options.output_file = "output_floorPlanning_" + run_number + "_" + options.ga_variant_name + ".txt";
+}
+
+void GA::set_option_output_file_o(std::string run_number)
+{
+    options.output_file_o = "output_floorPlanning_" + run_number + "_" + options.ga_variant_name + "_ObjFnc.txt";
+}
+
+void GA::set_file_names(int iterator)
+{
+    std::stringstream ss1;
+    std::stringstream ss2;
+    std::string temp1;
+    std::string temp2;
+    int previous_iterator = iterator - 1;
+    ss1 << iterator;
+    ss1 >> temp1;
+    ss2 << previous_iterator;
+    ss2 >> temp2;
+    
+    set_option_input_file(temp2);
+    set_option_input_file_o(temp2);
+    set_option_output_file(temp1);
+    set_option_output_file_o(temp1);
+}
+
 void GA::init(int eval_option, int report_option)
 {
     if(report_option == 1)
     {
         std::ofstream out(options.output_file);
-        out << "GEN,\t\tMIN,\t\t\t\tAVE,\t\t\t\tMAX,\t\t\t\tCONV,\t\t\tSEMI,\t\tSUPER,\tT_SEMI,\tT_SUPER,\tL_L,\t\t\tL_W,\t\tL_a,\t\tK_L,\t\tK_W,\t\tK_A,\t\tH_L,\t\tH_W,\t\tH_A,\t\tB1_L,\t\tB1_W,\t\tB1_A,\t\tB2_L,\t\tB2_W,\t\tB2_A,\t\tB3_L,\t\tB3_W,\t\tB3_A,\n";
+        out << "GEN,\t\tMIN,\t\t\t\tAVE,\t\t\t\tMAX,\t\t\t\tEXTINCT,\t\tCONV,\t\t\t\tSEMI,\t\tSUPER,\tT_SEMI,\tT_SUPER,\tL_L,\t\t\tL_W,\t\tL_a,\t\tK_L,\t\tK_W,\t\tK_A,\t\tH_L,\t\tH_W,\t\tH_A,\t\tB1_L,\t\tB1_W,\t\tB1_A,\t\tB2_L,\t\tB2_W,\t\tB2_A,\t\tB3_L,\t\tB3_W,\t\tB3_A,\n";
         out.close();
     }
     
@@ -236,7 +275,7 @@ void GA::init(int eval_option, int report_option)
     parent->stats(total_super_individuals, total_semi_super_individuals);
 
     if(report_option == 1)
-        parent->report(0, 1, total_super_individuals, total_semi_super_individuals);
+        parent->report(0, 1, total_super_individuals, total_semi_super_individuals, false);
     
     //OBJECTIVE OPERATIONS REPORT COMMENTED OUT
     // parent->stats_o();
@@ -280,7 +319,8 @@ void GA::run(int eval_option, int report_option)
             }
         }
 
-        parent->CHC_generation(child, m_temp);
+        if(m_ga_variant == 3 || m_ga_variant == 4)
+            parent->CHC_generation(child, m_temp);
 
         // UNIT TESTS: STRING EQUIVALENCE
         for(int j = 0; j < options.population_size; j++)
@@ -294,7 +334,10 @@ void GA::run(int eval_option, int report_option)
         child->stats(total_super_individuals, total_semi_super_individuals);
 
         if(report_option == 1)
-            child->report(i, 1, total_super_individuals, total_semi_super_individuals);
+        {
+            child->report(i, 1, total_super_individuals, total_semi_super_individuals, extinction);
+            extinction ? extinction = false : 0;
+        }
 
         //OBJECTIVE OPERATIONS REPORT COMMENTED OUT
         // child->stats_o();
@@ -316,7 +359,11 @@ void GA::run(int eval_option, int report_option)
         parent = child;
         child = temp;
 
-        extinction = extinction_check(eval_option, options.random_seed, srand_offset);
+        parent->reset_super_individual_count();
+        child->reset_super_individual_count();
+
+        if(m_ga_variant == 2 || m_ga_variant == 4)
+            extinction = extinction_check(eval_option, options.random_seed, srand_offset);
 
         delete[] test;
     }
@@ -334,14 +381,14 @@ bool GA::extinction_check(int eval_option, int random_seed, int srand_offset)
     //TEST
     // std::cout << extinction_counter << std::endl;
 
-    return extinction_counter == options.extinction_interval ? extinction_event(eval_option, options.random_seed, srand_offset) : false;
+    return extinction_counter == options.extinction_delay ? extinction_event(eval_option, options.random_seed, srand_offset) : false;
 }
 
 //IF USING CHC, FITTEST MEMBER IS AT TOP OF PARENT - OTHERWISE NEED TO REWRITE EXTINCTION_EVENT
 bool GA::extinction_event(int eval_option, int random_seed, int srand_offset)
 {
     //TEST
-    std::cout << "EXTINCTION EVENT!" << std::endl;
+    // std::cout << "EXTINCTION EVENT!" << std::endl;
 
     extinction_counter = 0;
     

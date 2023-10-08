@@ -8,10 +8,16 @@ int main(int argc, char* argv[])
     {
         std::cout << "If report is needed, must set argv[1] = 1; otherwise reporting is skipped" << std::endl;
         std::cout << "If multiple runs are needed, must set argv[2] = #runs; 1 run by default" << std::endl;
+        std::cout << "GA type is CHC by default. If a different version is required, set argv[3] to one of the following options:" << std::endl;
+        std::cout << "1. Simple GA" << std::endl;
+        std::cout << "2. Simple GA w/extinction event" << std::endl;
+        std::cout << "3. CHC" << std::endl;
+        std::cout << "4. CHC w/extinction event" << std::endl;
     }
 
     int report_option = 0;
     int runs = 1;
+    int ga_variant_option = 1;
     
     if(argc == 2)
     {
@@ -25,16 +31,90 @@ int main(int argc, char* argv[])
         if(runs <= 0 || runs > 10)
         {
             std::cout << "Can only choose up to 10 runs maximum" << std::endl;
-            std::cout << "Switching to 1 run default" << std::endl;
-            runs = 1;
+            std::cout << "Switching to 1 run by default" << std::endl;
+            runs = 2;
         }
     }
+    
+    if(argc == 4)
+    {
+        report_option = std::stoi(argv[1]);
+        runs = std::stoi(argv[2]);
+        ga_variant_option = std::stoi(argv[3]);
+
+
+
+        if(runs <= 0 || runs > 10)
+        {
+            std::cout << "Can only choose up to 10 runs maximum" << std::endl;
+            std::cout << "Switching to 1 run by default" << std::endl;
+            runs = 1;
+        }
+        if(ga_variant_option <= 0 || ga_variant_option > 4)
+        {
+            std::cout << "List of available variants" << std::endl;
+            std::cout << "1. Simple GA" << std::endl;
+            std::cout << "2. Simple GA w/extinction event" << std::endl;
+            std::cout << "3. CHC" << std::endl;
+            std::cout << "4. CHC w/extinction event" << std::endl;
+            std::cout << "Switching to option 2 (CHC) by default" << std::endl;
+            runs = 2;
+            ga_variant_option = 1;
+        }
+    }
+
+    //TEST
+    // std::cout << "MAIN::RUN = " << j << std::endl << std::endl;
+    switch(ga_variant_option)
+    {
+        case 1:
+            std::cout << "Simple GA\n";
+            break;
+        case 2:
+            std::cout << "Simple GA w/extinction\n";
+            break;
+        case 3:
+            std::cout << "CHC\n";
+            break;
+        case 4:
+            std::cout << "CHC w/extinction\n";
+            break;
+    }
+
     for(int j = 0; j < runs; j++)
     {
-        //TEST
-        // std::cout << "MAIN::RUN = " << j << std::endl << std::endl;
 
-        GA ga(argc, argv, 6, j);
+        GA ga(argc, argv, 6, j, ga_variant_option);
+        
+        switch(ga_variant_option)
+        {
+            case 1:
+                ga.set_option_xover_prob(0.667);
+                ga.set_option_mutation_prob(0.01);
+                ga.set_option_ga_variant_name("S");
+                ga.set_file_names(j);
+                break;
+            case 2:
+                ga.set_option_xover_prob(0.667);
+                ga.set_option_mutation_prob(0.01);
+                ga.set_option_ga_variant_name("S_E");
+                ga.set_file_names(j);
+                ga.set_option_extinction_delay(50);
+                ga.set_option_convergence_resolution_threshold(0.02);
+                break;
+            case 3:
+                ga.set_option_xover_prob(0.99);
+                ga.set_option_mutation_prob(0.5);
+                ga.set_option_ga_variant_name("CHC");
+                ga.set_file_names(j);
+                break;
+            case 4:
+                ga.set_option_xover_prob(0.99);
+                ga.set_option_mutation_prob(0.5);
+                ga.set_option_ga_variant_name("CHC_E");
+                ga.set_file_names(j);
+                break;
+        }
 
         try
             {ga.init(6, report_option);}

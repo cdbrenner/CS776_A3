@@ -94,38 +94,6 @@ Population::~Population()
     
     if(max_fitness_dimensions != nullptr)
         delete max_fitness_dimensions;
-
-    // if(child_transform_data != nullptr)
-    // {
-    //     for(int i = 0; i < options.population_size; i++)
-    //     {
-    //         if(child_transform_data[i] != nullptr)
-    //             delete[] child_transform_data[i];
-    //     }
-    //     delete[] child_transform_data;
-    // }
-
-    // if(transform_data != nullptr)
-    // {
-    //     for(int i = 0; i < options.population_size; i++)
-    //     {
-    //         if(transform_data[i] != nullptr)
-    //             delete[] transform_data[i];
-    //     }
-    //     delete[] transform_data;
-    // }
-
-    // if(parent_1 != nullptr)
-    //     delete parent_1;
-
-    // if(parent_2 != nullptr)
-    //     delete parent_2;
-
-    // if(child_1 != nullptr)
-    //     delete child_1;
-
-    // if(child_2 != nullptr)
-    //     delete child_2;
 }
 
 void Population::init_transform_data(int row)
@@ -192,32 +160,6 @@ void Population::copy_population(const Population &copy)
 
 }
 
-// void Population::set_transform_data(const int*data[1000])
-// {
-    //TEST
-    // std::cout << "POP::SET_TRANSFORM" << std::endl;
-    // std::cout << "PASSED DATA[0][0] = " << data[0][0] << std::endl;
-    // if(transform_data != nullptr)
-    // {
-    //     for(int i = 0; i < options.population_size; i++)
-    //     {
-    //         if(transform_data[i] != nullptr)
-    //             delete[] transform_data[i];
-    //     }
-    //     delete[] transform_data;
-    //     transform_data = nullptr;
-    // }
-    
-    // transform_data = new int*[options.population_size];
-
-    // for(int i = 0; i < options.population_size; i++)
-    // {
-    //     transform_data[i] = new int[data[i][0]];
-    //     for(int j = 0; j < data[i][0]; j++)
-    //         transform_data[i][j] = data[i][j];
-    // }
-// }
-
 void Population::set_transform_data_by_row(int* data, int row)
 {
     for(int i = 0; i < data[0]; i++)
@@ -226,39 +168,18 @@ void Population::set_transform_data_by_row(int* data, int row)
     }
 }
 
-// void Population::set_child_transform_data(int** data)
-// {
-    //TEST
-    // std::cout << "POP::SET_TRANSFORM" << std::endl;
-    // std::cout << "PASSED DATA[0][0] = " << data[0][0] << std::endl;
-    // if(child_transform_data != nullptr)
-    // {
-    //     for(int i = 0; i < options.population_size; i++)
-    //     {
-    //         if(child_transform_data[i] != nullptr)
-    //             delete[] child_transform_data[i];
-    //     }
-    //     delete[] child_transform_data;
-    //     child_transform_data = nullptr;
-    // }
-
-    // child_transform_data = new int*[options.population_size];
-    // for(int i = 0; i < options.population_size; i++)
-    // {   
-    //     child_transform_data[i] = new int[data[i][0]];
-    //     for(int j = 0; j < data[i][0]; j++)
-    //     {
-    //         child_transform_data[i][j] = data[i][j];
-    //     }
-    // }
-// }
-
 void Population::set_child_transform_data_by_row(int* data, int row)
 {
     for(int i = 0; i < data[0]; i++)
     {
         child_transform_data[row][i] = data[i];
     }
+}
+
+void Population::reset_super_individual_count()
+{
+    super_individuals = 0;
+    semi_super_individuals = 0;
 }
 
 Individual* Population::get_members()
@@ -357,7 +278,7 @@ void Population::evaluate_o(int choice, int choice_2, int random_seed, int srand
     }
 }
 
-void Population::stats(int total_super_individuals, int total_semi_super_individuals)
+void Population::stats(int& total_super_individuals, int& total_semi_super_individuals)
 {
     sum_fitness = convergence = 0;
     min = max = members[0].get_fitness();
@@ -422,7 +343,7 @@ void Population::stats_o()
 }
 
 //SET OPTION = 1 IF AVERAGING IS NOT REQUIRED
-void Population::report(int generation, int option, int total_super_individuals, int total_semi_super_individuals)
+void Population::report(int generation, int option, int total_super_individuals, int total_semi_super_individuals, bool extinction_event)
 {
     //TEST
     // char temp;
@@ -436,25 +357,26 @@ void Population::report(int generation, int option, int total_super_individuals,
         std::ofstream out(options.output_file, std::ios::app);
         out << std::fixed << std::setprecision(options.print_precision) << add_whitespace(generation, options.max_generations, true)
                 << generation << ",\t\t" << min << ",\t\t" << average << ",\t\t" << max
-                    << ",\t\t" << std::setprecision(5) << convergence << ",\t" << semi_super_individuals << ",\t\t\t" << super_individuals << ",\t\t\t" << total_semi_super_individuals << ",\t\t\t" << total_super_individuals
-                        << ",\t\t\t\t" << std::setprecision(options.print_precision) << 1.5 * (members[max_fitness_member_index].get_dimensions()[0] + options.living_width_offset)
-                            << ",\t\t" << members[max_fitness_member_index].get_dimensions()[0] + options.living_width_offset
-                                << ",\t\t" << 1.5* pow(members[max_fitness_member_index].get_dimensions()[0] + options.living_width_offset, 2)
-                                    << ",\t\t" << members[max_fitness_member_index].get_dimensions()[1] + options.kitchen_length_offset
-                                        << ",\t\t" << members[max_fitness_member_index].get_dimensions()[2] + options.kitchen_width_offset
-                                            << ",\t\t" << members[max_fitness_member_index].get_dimensions()[1] + options.kitchen_length_offset * (members[max_fitness_member_index].get_dimensions()[2] + options.kitchen_width_offset)
-                                                <<",\t\t" << "5.5"
-                                                    << ",\t\t" << members[max_fitness_member_index].get_dimensions()[3] + options.hall_width_offset
-                                                        << ",\t\t" << 5.5 * (members[max_fitness_member_index].get_dimensions()[3] + options.hall_width_offset)
-                                                            << ",\t\t" << 1.5 * (members[max_fitness_member_index].get_dimensions()[4] + options.bed_1_width_offset)
-                                                                << ",\t\t" << members[max_fitness_member_index].get_dimensions()[4] + options.bed_1_width_offset
-                                                                    << ",\t\t" << 1.5 * pow(members[max_fitness_member_index].get_dimensions()[4] + options.bed_1_width_offset, 2)
-                                                                        << ",\t\t" << 1.5 * (members[max_fitness_member_index].get_dimensions()[5] + options.bed_2_width_offset)
-                                                                            << ",\t\t" << members[max_fitness_member_index].get_dimensions()[5] + options.bed_2_width_offset
-                                                                                << ",\t\t" << 1.5 * pow(members[max_fitness_member_index].get_dimensions()[5] + options.bed_2_width_offset, 2)
-                                                                                    << ",\t\t" << 1.5 * (members[max_fitness_member_index].get_dimensions()[6] + options.bed_3_width_offset)
-                                                                                        << ",\t\t" << members[max_fitness_member_index].get_dimensions()[6] + options.bed_3_width_offset
-                                                                                            << ",\t\t" << 1.5 * pow(members[max_fitness_member_index].get_dimensions()[6] + options.bed_3_width_offset, 2) << std::endl;
+                    << ",\t\t" << (extinction_event ? 1 : 0)
+                        << ",\t\t\t\t\t" << std::setprecision(5) << convergence << ",\t\t" << semi_super_individuals << ",\t\t\t" << super_individuals << ",\t\t\t" << total_semi_super_individuals << ",\t\t\t" << total_super_individuals
+                            << ",\t\t\t\t" << std::setprecision(options.print_precision) << 1.5 * (members[max_fitness_member_index].get_dimensions()[0] + options.living_width_offset)
+                                << ",\t\t" << members[max_fitness_member_index].get_dimensions()[0] + options.living_width_offset
+                                    << ",\t\t" << 1.5* pow(members[max_fitness_member_index].get_dimensions()[0] + options.living_width_offset, 2)
+                                        << ",\t\t" << members[max_fitness_member_index].get_dimensions()[1] + options.kitchen_length_offset
+                                            << ",\t\t" << members[max_fitness_member_index].get_dimensions()[2] + options.kitchen_width_offset
+                                                << ",\t\t" << members[max_fitness_member_index].get_dimensions()[1] + options.kitchen_length_offset * (members[max_fitness_member_index].get_dimensions()[2] + options.kitchen_width_offset)
+                                                    <<",\t\t" << "5.5"
+                                                        << ",\t\t" << members[max_fitness_member_index].get_dimensions()[3] + options.hall_width_offset
+                                                            << ",\t\t" << 5.5 * (members[max_fitness_member_index].get_dimensions()[3] + options.hall_width_offset)
+                                                                << ",\t\t" << 1.5 * (members[max_fitness_member_index].get_dimensions()[4] + options.bed_1_width_offset)
+                                                                    << ",\t\t" << members[max_fitness_member_index].get_dimensions()[4] + options.bed_1_width_offset
+                                                                        << ",\t\t" << 1.5 * pow(members[max_fitness_member_index].get_dimensions()[4] + options.bed_1_width_offset, 2)
+                                                                            << ",\t\t" << 1.5 * (members[max_fitness_member_index].get_dimensions()[5] + options.bed_2_width_offset)
+                                                                                << ",\t\t" << members[max_fitness_member_index].get_dimensions()[5] + options.bed_2_width_offset
+                                                                                    << ",\t\t" << 1.5 * pow(members[max_fitness_member_index].get_dimensions()[5] + options.bed_2_width_offset, 2)
+                                                                                        << ",\t\t" << 1.5 * (members[max_fitness_member_index].get_dimensions()[6] + options.bed_3_width_offset)
+                                                                                            << ",\t\t" << members[max_fitness_member_index].get_dimensions()[6] + options.bed_3_width_offset
+                                                                                                << ",\t\t" << 1.5 * pow(members[max_fitness_member_index].get_dimensions()[6] + options.bed_3_width_offset, 2) << std::endl;
             out.close();
     }
     //AVERAGING REPORT

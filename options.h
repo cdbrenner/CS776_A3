@@ -9,6 +9,7 @@ struct Options
     std::string output_file_o;
     std::string ave_file;
     std::string ave_file_o;
+    std::string ga_variant_name;
     int GA_iteration;
     int print_precision;
     int print_precision_o;
@@ -20,9 +21,9 @@ struct Options
     double probability_x;
     double probability_mutation;
     double convergence_resolution_threshold;
-    int extinction_interval;
-    int super_individual_threshold;
-    int semi_super_individual_threshold;
+    int extinction_delay;
+    double super_individual_threshold;
+    double semi_super_individual_threshold;
     
     //INDIVIDUAL::TRANSFORM_DATA INDICES
     int m_isParent_index = 1; // USED IN CHC TO TELL WHETHER COMPARISON IS MADE TO GRANDPARENT (1) OR CHILD (0)
