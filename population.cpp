@@ -182,6 +182,26 @@ void Population::reset_super_individual_count()
     semi_super_individuals = 0;
 }
 
+int Population::find_max_fitness_member()
+{
+    double temp_fitness = -1;
+    double temp_max = 0;
+    int temp_max_member_index = 0;
+
+    for(int i = 0; i < options.population_size; i++)
+    {
+        temp_fitness = members[i].get_fitness();
+
+        if(temp_fitness > temp_max)
+        {
+            temp_max = temp_fitness;
+            temp_max_member_index = i;
+        }
+    }
+
+    return temp_max_member_index;
+}
+
 Individual* Population::get_members()
 {
     return members;
@@ -539,6 +559,13 @@ void Population::xover_mutate(Individual* parent_1, Individual* parent_2, Indivi
     // UNIT TESTS: STRING EQUIVALENCE
     verify_string_equivalence(parent_1, &test_1_p1, "POP::XOVER_MUTATE, AFTER SETTING CHILD = PARENT");
     verify_string_equivalence(parent_2, &test_2_p2, "POP::XOVER_MUTATE, AFTER SETTING CHILD = PARENT");
+
+    
+    //TEST
+    // std::cout << "POP::XOVER" << std::endl;
+    // std::cout << "probability_x = " << options.probability_x << std::endl;
+    // char t;
+    // std::cin >> t;
 
     int index = -1;
     if(flip(options.probability_x, options.random_seed, srand_offset))

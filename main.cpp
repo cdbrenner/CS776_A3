@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
             case 2:
                 ga.set_option_xover_prob(0.667);
                 ga.set_option_mutation_prob(0.01);
-                ga.set_option_ga_variant_name("S_E");
+                ga.set_option_ga_variant_name("S-E"); // THIS NAME IS BEING USED TO TRIGGER PROPER EXTINCTION_EVENT
                 ga.set_file_names(j);
                 ga.set_option_extinction_delay(50);
                 ga.set_option_convergence_resolution_threshold(0.02);
@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
             case 4:
                 ga.set_option_xover_prob(0.99);
                 ga.set_option_mutation_prob(0.5);
-                ga.set_option_ga_variant_name("CHC_E");
+                ga.set_option_ga_variant_name("CHC-E");
                 ga.set_file_names(j);
                 break;
         }

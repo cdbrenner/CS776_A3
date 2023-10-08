@@ -129,6 +129,12 @@ void Individual::mutate(double probability, int random_seed, int srand_offset)
 {
     mutate_count = 0;
 
+    //TEST
+    // std::cout << "INDIVIDUAL::MUTATE" << std::endl;
+    // std::cout << "probability_m = " << probability << std::endl;
+    // char t;
+    // std::cin >> t;
+
     for(int i = 0; i < chromosome_length; i++)
     {
         if(flip(probability, random_seed, srand_offset*chromosome_length + i))

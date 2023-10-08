@@ -165,9 +165,7 @@ void GA::setup_options(int argc, char *argv[], int eval_option, int iterator)
             //REAL
             //OPTIONS CANNOT EQUAL ODD NUMBER OR SEGMENT FAULT!!!
             options.population_size = 500;
-            options.max_generations = 5000;
-            options.probability_mutation = 0.5;
-            options.probability_x = 0.99;
+            options.max_generations = 10000;
             
             options.ave_file = "output_floorPlanning_AVE.txt";
             options.ave_file_o = "output_floorPlanning_AVE_ObjFnc.txt";
@@ -204,22 +202,22 @@ void GA::set_option_ga_variant_name(std::string name)
 
 void GA::set_option_input_file(std::string run_number)
 {
-    options.input_file = "output_floorPlanning_" + run_number + "_" + options.ga_variant_name + ".txt";
+    options.input_file = "output_floorPlanning_" + options.ga_variant_name + "_" + run_number  + ".txt";
 }
 
 void GA::set_option_input_file_o(std::string run_number)
 {
-    options.input_file_o = "output_floorPlanning_" + run_number + "_" + options.ga_variant_name + "_ObjFnc.txt";
+    options.input_file_o = "output_floorPlanning_" + options.ga_variant_name + "_" + run_number  + "_ObjFnc.txt";
 }
 
 void GA::set_option_output_file(std::string run_number)
 {
-    options.output_file = "output_floorPlanning_" + run_number + "_" + options.ga_variant_name + ".txt";
+    options.output_file = "output_floorPlanning_" + options.ga_variant_name + "_" + run_number  + ".txt";
 }
 
 void GA::set_option_output_file_o(std::string run_number)
 {
-    options.output_file_o = "output_floorPlanning_" + run_number + "_" + options.ga_variant_name + "_ObjFnc.txt";
+    options.output_file_o = "output_floorPlanning_" + options.ga_variant_name + "_" + run_number  + "_ObjFnc.txt";
 }
 
 void GA::set_file_names(int iterator)
@@ -333,6 +331,16 @@ void GA::run(int eval_option, int report_option)
 
         child->stats(total_super_individuals, total_semi_super_individuals);
 
+        //TEST: PRINT POPULATION AND TRANSFORM DATA
+        // if(extinction)
+        // {
+        //     std::cout << "\nPOP::RUN(BELOW REPORT)" << std::endl;
+        //     print_population_data();
+
+        //     char temp;
+        //     std::cin >> temp;
+        // }
+
         if(report_option == 1)
         {
             child->report(i, 1, total_super_individuals, total_semi_super_individuals, extinction);
@@ -342,18 +350,6 @@ void GA::run(int eval_option, int report_option)
         //OBJECTIVE OPERATIONS REPORT COMMENTED OUT
         // child->stats_o();
         // child->report_o(i, 1);
-
-        //TEST: PRINT POPULATION AND TRANSFORM DATA
-        // if(extinction)
-        // {
-        //     // std::cout << "\nPOP::RUN(BELOW REPORT)" << std::endl;
-        //     // print_population_data();
-
-        //     //TEST
-        //     char temp;
-        //     std::cin >> temp;
-        //     extinction = false;
-        // }
         
         Population *temp = parent;
         parent = child;
@@ -384,14 +380,25 @@ bool GA::extinction_check(int eval_option, int random_seed, int srand_offset)
     return extinction_counter == options.extinction_delay ? extinction_event(eval_option, options.random_seed, srand_offset) : false;
 }
 
-//IF USING CHC, FITTEST MEMBER IS AT TOP OF PARENT - OTHERWISE NEED TO REWRITE EXTINCTION_EVENT
 bool GA::extinction_event(int eval_option, int random_seed, int srand_offset)
 {
     //TEST
     // std::cout << "EXTINCTION EVENT!" << std::endl;
-
     extinction_counter = 0;
-    
+    if(options.ga_variant_name == "S-E")
+    {
+        int max_fitness_member = parent->find_max_fitness_member();
+
+        //TEST
+        // std::cout << "GA::EXTINCTION_EVENT\n";
+        // std::cout << "parent->get_members()[max_fitness_member].fitness = " << parent->get_members()[max_fitness_member].get_fitness() << std::endl;
+        // std::cout << "MEM["<<max_fitness_member<<"]: "; parent->get_members()[max_fitness_member].print_ind();
+        // char temp;
+        // std::cin >> temp;
+
+        parent->get_members()[0] = parent->get_members()[max_fitness_member];
+    }
+
     for(int i = 1; i < options.population_size; i++)
     {
         parent->get_members()[i].init(random_seed, srand_offset + i);

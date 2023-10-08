@@ -45,6 +45,7 @@ class Population
         void set_transform_data_by_row(int* transform_data_row, int row);
         void set_child_transform_data_by_row(int* child_transform_data, int row);
         void reset_super_individual_count();
+        int find_max_fitness_member();
 
         Individual* get_members();
         int* get_transform_data(int row);
