@@ -5,6 +5,7 @@
 #include "options.h"
 #include "individual.h"
 #include "evaluate.h"
+#define MAX_SIZE 1000
 
 class Population
 {
@@ -17,6 +18,7 @@ class Population
         // Individual *child_1 = nullptr;
         // Individual *child_2 = nullptr;
         int** transform_data = nullptr;
+        int transform_data[MAX_SIZE][MAX_SIZE];
         int** child_transform_data = nullptr;
         double average, max, min, sum_fitness, convergence;
         double average_objective, max_objective, min_objective, sum_objective;
