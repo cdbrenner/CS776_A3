@@ -17,6 +17,7 @@ class Population
         int child_transform_data[TRANSFORM_DATA_SIZE][TRANSFORM_DATA_SIZE];
         int child_transform_data_count = 0;
         double average, max, min, sum_fitness, convergence;
+        double max_convergence_on_actual;
         double average_objective, max_objective, min_objective, sum_objective;
         int super_individuals = 0;
         int semi_super_individuals = 0;

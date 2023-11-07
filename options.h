@@ -24,6 +24,7 @@ struct Options
     int extinction_delay;
     double super_individual_threshold;
     double semi_super_individual_threshold;
+    int eval_option;
     
     //INDIVIDUAL::TRANSFORM_DATA INDICES
     int m_isParent_index = 1; // USED IN CHC TO TELL WHETHER COMPARISON IS MADE TO GRANDPARENT (1) OR CHILD (0)

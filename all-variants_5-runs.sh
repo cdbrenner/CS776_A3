@@ -2,5 +2,5 @@
 
 for values in {1..4}
 do
-    ./x 1 6 $values
+    ./x 1 5 $values
 done

@@ -7,6 +7,8 @@ class GA
 {
     private:
         int m_ga_variant = 0;
+        double m_mutation_probability = -1;
+        double m_xover_probability = -1;
         Population *parent = nullptr;
         Population *child = nullptr;
         Population *m_temp = nullptr;
@@ -19,7 +21,7 @@ class GA
         Population *grandparent = nullptr;
 
     public:
-        GA(int argc, char *argv[], int eval_option, int iterator, int ga_variant);
+        GA(int argc, char *argv[], int eval_option, int iterator, int ga_variant, double mutation_probability, double xover_probability);
         ~GA();
 
         void setup_options(int argc, char *argv[], int eval_option, int iterator);

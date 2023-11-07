@@ -300,7 +300,7 @@ void Population::evaluate_o(int choice, int choice_2, int random_seed, int srand
 
 void Population::stats(int& total_super_individuals, int& total_semi_super_individuals)
 {
-    sum_fitness = convergence = 0;
+    sum_fitness = convergence = max_convergence_on_actual = 0;
     min = max = members[0].get_fitness();
     max_fitness_member_index = 0;
     double fitness = -1;
@@ -340,6 +340,27 @@ void Population::stats(int& total_super_individuals, int& total_semi_super_indiv
 
     total_super_individuals += super_individuals;
     total_semi_super_individuals += semi_super_individuals;
+
+    // FOR DEJONG ONLY - OTHERWISE COMMENT OUT
+    switch(options.eval_option)
+    {
+        case 1:
+            max_convergence_on_actual = max/78.6432;
+            break;
+        case 2:
+            max_convergence_on_actual = max/3905.9262268416;
+            break;
+        case 3:
+            max_convergence_on_actual = max/60;
+            break;
+        case 4:
+            max_convergence_on_actual = max/1300;
+            break;
+        case 5:
+            max_convergence_on_actual = max/1;
+            break;
+
+    }
 }
 
 //NEEDS TO BE UPDATED WITH IF STATEMENTS RATHER THAN ? STATEMENS, LIKE IN stats() ABOVE
@@ -365,101 +386,86 @@ void Population::stats_o()
 //SET OPTION = 1 IF AVERAGING IS NOT REQUIRED
 void Population::report(int generation, int option, int total_super_individuals, int total_semi_super_individuals, bool extinction_event)
 {
-    //TEST
-    // char temp;
-    // std::cout << "max_fitness_member_index = "  << max_fitness_member_index << std::endl;
-    // std::cout << "variables[0] = " << members[max_fitness_member_index].get_dimensions()[0] << std::endl;
-    // std::cin >> temp;
-
-    //NON-AVERAGING REPORT
-    if(options.GA_iteration == 0 || option == 1)
-    {
-        std::ofstream out(options.output_file, std::ios::app);
-        out << std::fixed << std::setprecision(options.print_precision) << add_whitespace(generation, options.max_generations, true)
-                << generation << ",\t\t" << min << ",\t\t" << average << ",\t\t" << max
-                    << ",\t\t" << (extinction_event ? 1 : 0)
-                        << ",\t\t\t\t\t" << std::setprecision(5) << convergence << ",\t\t" << semi_super_individuals << ",\t\t\t" << super_individuals << ",\t\t\t" << total_semi_super_individuals << ",\t\t\t" << total_super_individuals
-                            << ",\t\t\t\t" << std::setprecision(options.print_precision) << 1.5 * (members[max_fitness_member_index].get_dimensions()[0] + options.living_width_offset)
-                                << ",\t\t" << members[max_fitness_member_index].get_dimensions()[0] + options.living_width_offset
-                                    << ",\t\t" << 1.5* pow(members[max_fitness_member_index].get_dimensions()[0] + options.living_width_offset, 2)
-                                        << ",\t\t" << members[max_fitness_member_index].get_dimensions()[1] + options.kitchen_length_offset
-                                            << ",\t\t" << members[max_fitness_member_index].get_dimensions()[2] + options.kitchen_width_offset
-                                                << ",\t\t" << members[max_fitness_member_index].get_dimensions()[1] + options.kitchen_length_offset * (members[max_fitness_member_index].get_dimensions()[2] + options.kitchen_width_offset)
-                                                    <<",\t\t" << "5.5"
-                                                        << ",\t\t" << members[max_fitness_member_index].get_dimensions()[3] + options.hall_width_offset
-                                                            << ",\t\t" << 5.5 * (members[max_fitness_member_index].get_dimensions()[3] + options.hall_width_offset)
-                                                                << ",\t\t" << 1.5 * (members[max_fitness_member_index].get_dimensions()[4] + options.bed_1_width_offset)
-                                                                    << ",\t\t" << members[max_fitness_member_index].get_dimensions()[4] + options.bed_1_width_offset
-                                                                        << ",\t\t" << 1.5 * pow(members[max_fitness_member_index].get_dimensions()[4] + options.bed_1_width_offset, 2)
-                                                                            << ",\t\t" << 1.5 * (members[max_fitness_member_index].get_dimensions()[5] + options.bed_2_width_offset)
-                                                                                << ",\t\t" << members[max_fitness_member_index].get_dimensions()[5] + options.bed_2_width_offset
-                                                                                    << ",\t\t" << 1.5 * pow(members[max_fitness_member_index].get_dimensions()[5] + options.bed_2_width_offset, 2)
-                                                                                        << ",\t\t" << 1.5 * (members[max_fitness_member_index].get_dimensions()[6] + options.bed_3_width_offset)
-                                                                                            << ",\t\t" << members[max_fitness_member_index].get_dimensions()[6] + options.bed_3_width_offset
-                                                                                                << ",\t\t" << 1.5 * pow(members[max_fitness_member_index].get_dimensions()[6] + options.bed_3_width_offset, 2) << std::endl;
-            out.close();
-    }
-    //AVERAGING REPORT
-    else
-    {
-        std::string temp;
-        std::string min_prev_str;
-        std::string ave_prev_str;
-        std::string max_prev_str;
-        std::ifstream in(options.input_file);
-
-        //FINDS BOTTOM LINE OF CURRENT REPORT
-        for(int i = 0; i < generation + 1; i++)
-        {
-            getline(in,temp);
-        }
-
-        getline(in,temp,',');
-        getline(in,min_prev_str,',');
-        getline(in,ave_prev_str,',');
-        getline(in,max_prev_str,',');
-        double min_prev = strtod(min_prev_str.c_str(), NULL);
-        double ave_prev = strtod(ave_prev_str.c_str(), NULL);
-        double max_prev = strtod(max_prev_str.c_str(), NULL);
-
-        std::ofstream out(options.output_file, std::ios::app);
-        out << std::fixed << std::setprecision(options.print_precision) << generation << ",\t\t" << min + min_prev << ",\t\t" << average + ave_prev << ",\t\t" << max + max_prev << "," << std::endl;
+    std::ofstream out(options.output_file, std::ios::app);
+    out << std::fixed << std::setprecision(options.print_precision) << add_whitespace(generation, options.max_generations, true)
+            << generation << ",\t\t" << min << ",\t\t" << average << ",\t\t" << max
+                << ",\t\t\t\t" << std::setprecision(5) << convergence << ",\t\t\t\t" << max_convergence_on_actual << std::endl;
         out.close();
-    }
+
 }
 
-//SET OPTION = 1 IF AVERAGING IS NOT REQUIRED
+// //PURELY FOR FLOOPLANNING - ABOVE IS FOR DEJONG
+// //SET OPTION = 1 IF AVERAGING IS NOT REQUIRED
+// void Population::report(int generation, int option, int total_super_individuals, int total_semi_super_individuals, bool extinction_event)
+// {
+//     //TEST
+//     // char temp;
+//     // std::cout << "max_fitness_member_index = "  << max_fitness_member_index << std::endl;
+//     // std::cout << "variables[0] = " << members[max_fitness_member_index].get_dimensions()[0] << std::endl;
+//     // std::cin >> temp;
+
+//     //NON-AVERAGING REPORT
+//     if(options.GA_iteration == 0 || option == 1)
+//     {
+//         std::ofstream out(options.output_file, std::ios::app);
+//         out << std::fixed << std::setprecision(options.print_precision) << add_whitespace(generation, options.max_generations, true)
+//                 << generation << ",\t\t" << min << ",\t\t" << average << ",\t\t" << max
+//                     << ",\t\t" << (extinction_event ? 1 : 0)
+//                         << ",\t\t\t\t\t" << std::setprecision(5) << convergence << ",\t\t" << semi_super_individuals << ",\t\t\t" << super_individuals << ",\t\t\t" << total_semi_super_individuals << ",\t\t\t" << total_super_individuals
+//                             << ",\t\t\t\t" << std::setprecision(options.print_precision) << 1.5 * (members[max_fitness_member_index].get_dimensions()[0] + options.living_width_offset)
+//                                 << ",\t\t" << members[max_fitness_member_index].get_dimensions()[0] + options.living_width_offset
+//                                     << ",\t\t" << 1.5* pow(members[max_fitness_member_index].get_dimensions()[0] + options.living_width_offset, 2)
+//                                         << ",\t\t" << members[max_fitness_member_index].get_dimensions()[1] + options.kitchen_length_offset
+//                                             << ",\t\t" << members[max_fitness_member_index].get_dimensions()[2] + options.kitchen_width_offset
+//                                                 << ",\t\t" << members[max_fitness_member_index].get_dimensions()[1] + options.kitchen_length_offset * (members[max_fitness_member_index].get_dimensions()[2] + options.kitchen_width_offset)
+//                                                     <<",\t\t" << "5.5"
+//                                                         << ",\t\t" << members[max_fitness_member_index].get_dimensions()[3] + options.hall_width_offset
+//                                                             << ",\t\t" << 5.5 * (members[max_fitness_member_index].get_dimensions()[3] + options.hall_width_offset)
+//                                                                 << ",\t\t" << 1.5 * (members[max_fitness_member_index].get_dimensions()[4] + options.bed_1_width_offset)
+//                                                                     << ",\t\t" << members[max_fitness_member_index].get_dimensions()[4] + options.bed_1_width_offset
+//                                                                         << ",\t\t" << 1.5 * pow(members[max_fitness_member_index].get_dimensions()[4] + options.bed_1_width_offset, 2)
+//                                                                             << ",\t\t" << 1.5 * (members[max_fitness_member_index].get_dimensions()[5] + options.bed_2_width_offset)
+//                                                                                 << ",\t\t" << members[max_fitness_member_index].get_dimensions()[5] + options.bed_2_width_offset
+//                                                                                     << ",\t\t" << 1.5 * pow(members[max_fitness_member_index].get_dimensions()[5] + options.bed_2_width_offset, 2)
+//                                                                                         << ",\t\t" << 1.5 * (members[max_fitness_member_index].get_dimensions()[6] + options.bed_3_width_offset)
+//                                                                                             << ",\t\t" << members[max_fitness_member_index].get_dimensions()[6] + options.bed_3_width_offset
+//                                                                                                 << ",\t\t" << 1.5 * pow(members[max_fitness_member_index].get_dimensions()[6] + options.bed_3_width_offset, 2) << std::endl;
+//             out.close();
+//     }
+//     //AVERAGING REPORT
+//     else
+//     {
+//         std::string temp;
+//         std::string min_prev_str;
+//         std::string ave_prev_str;
+//         std::string max_prev_str;
+//         std::ifstream in(options.input_file);
+
+//         //FINDS BOTTOM LINE OF CURRENT REPORT
+//         for(int i = 0; i < generation + 1; i++)
+//         {
+//             getline(in,temp);
+//         }
+
+//         getline(in,temp,',');
+//         getline(in,min_prev_str,',');
+//         getline(in,ave_prev_str,',');
+//         getline(in,max_prev_str,',');
+//         double min_prev = strtod(min_prev_str.c_str(), NULL);
+//         double ave_prev = strtod(ave_prev_str.c_str(), NULL);
+//         double max_prev = strtod(max_prev_str.c_str(), NULL);
+
+//         std::ofstream out(options.output_file, std::ios::app);
+//         out << std::fixed << std::setprecision(options.print_precision) << generation << ",\t\t" << min + min_prev << ",\t\t" << average + ave_prev << ",\t\t" << max + max_prev << "," << std::endl;
+//         out.close();
+//     }
+// }
+
 void Population::report_o(int generation, int option)
 {
-    if(options.GA_iteration == 0 || option == 1)
-    {
-        std::ofstream out(options.output_file_o, std::ios::app);
-        out << std::fixed << std::setprecision(options.print_precision_o) << generation << ",\t\t" << min_objective << ",\t\t" << average_objective << ",\t\t" << max_objective << "," << std::endl;
-        out.close();
-    }
-    else
-    {
-        std::string temp;
-        std::string min_prev_str;
-        std::string ave_prev_str;
-        std::string max_prev_str;
-        std::ifstream in(options.input_file_o);
-        for(int i = 0; i < generation + 1; i++)
-        {
-            getline(in,temp);
-        }
-        getline(in,temp,',');
-        getline(in,min_prev_str,',');
-        getline(in,ave_prev_str,',');
-        getline(in,max_prev_str,',');
-        double min_prev = atof(min_prev_str.c_str());
-        double ave_prev = atof(ave_prev_str.c_str());
-        double max_prev = atof(max_prev_str.c_str());
-
-        std::ofstream out(options.output_file_o, std::ios::app);
-        out << std::fixed << std::setprecision(options.print_precision_o) << generation << ",\t\t" << min_objective + min_prev << ",\t\t" << average_objective + ave_prev << ",\t\t" << max_objective + max_prev << "," << std::endl;
-        out.close();
-    }
+    std::ofstream out(options.output_file_o, std::ios::app);
+    out << std::fixed << std::setprecision(options.print_precision_o) << generation << ",\t\t" << min_objective << ",\t\t" << average_objective << ",\t\t" << max_objective << "," << std::endl;
+    out.close();
 }
 
 void Population::generation(Population*& child, int srand_offset)

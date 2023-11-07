@@ -125,9 +125,9 @@ void test_nine_variables_in_random_choice(int runs, int bit_length)
     std::cout << "nine = " << (double)nine/runs << std::endl;
 }
 
-void verify_xover_mutation_mechanism(Population* parent, Population* child)
+void verify_xover_mutation_mechanism(Population* parent, Population* child, std::string addOnMessage)
 {
-    std::string error_message = "XOVER-MUTATE MECHANISM TEST FAILED";
+    std::string error_message = "XOVER-MUTATE MECHANISM TEST FAILED" + addOnMessage;
 
     bool equal = true;
     for(int i = 0; i < parent->get_options().population_size; i++)

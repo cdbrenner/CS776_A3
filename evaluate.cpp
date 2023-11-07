@@ -1,7 +1,16 @@
 #include "evaluate.h"
 
-void deleter(double* variables)
+void deleter(double*& variables)
 {
+    // if(variables != nullptr)
+    // {
+    //     for(int i = 0; i < count; i++)
+    //     {
+    //         delete variables[i];
+    //     }
+    //     delete[] variables;
+    // }
+
     if(variables != nullptr)
         delete[] variables;
 }
@@ -158,13 +167,34 @@ double floorPlanning(Individual& individual, int variable_count, int bit_length[
     //VARIABLES[5] = BED2_WIDTH
     //VARIABLES[6] = BED3_WIDTH
 
+    //TEST
+    // std::cout << "EVALUATE::FLOORPLANNING" << std::endl;
+    // std::cout << "weight normal = " << weight_normal << std::endl;
+    // std::cout << "weight_special = " << weight_special << std::endl;
+    // std::cout << std::endl;
+
     double living = 1.5*pow((8 + variables[0]),2);
     living < 120 ? living = 300 + weight_normal*(120 - living) : 0;
     living > 300 ? living = 300 + weight_normal*(living - 300) : 0;
 
     double kitchen = (6 + variables[1])*(6 + variables[2]);
-    kitchen < 50 ? kitchen = 120 + weight_special*(50 - kitchen) : 0;
-    kitchen > 120 ? kitchen = 120 + weight_special*(kitchen - 120) : 0;
+
+    //TEST
+    // std::cout << "kitchen(pre) = " << kitchen << std::endl;
+
+    if(kitchen < 50)
+    {
+        kitchen = 120 + weight_special*(50 - kitchen);
+    }
+    else if(kitchen > 120)
+    {
+        kitchen = 120 + weight_special*(kitchen - 120);
+    }
+    // kitchen < 50 ? kitchen = 120 + weight_special*(50 - kitchen) : 0;
+    // kitchen > 120 ? kitchen = 120 + weight_special*(kitchen - 120) : 0;
+
+    //TEST
+    // std::cout << "kitchen(post) = " << kitchen << std::endl;
 
     double hall = 5.5*(3.5 + variables[3]);
     hall < 19 ? hall = 72 + weight_normal*(19 - hall) : 0;
@@ -182,12 +212,23 @@ double floorPlanning(Individual& individual, int variable_count, int bit_length[
     bed_3 < 100 ? bed_3 = 180 + weight_normal*(100 - bed_3) : 0;
     bed_3 > 180 ? bed_3 = 180 + weight_normal*(bed_3 - 180) : 0;
 
-    //TEST
-    // double objective_function = 2*kitchen + hall + bed_1 + bed_2 + bed_3;
-    //REAL
     double objective_function = living + 2*kitchen + hall + bed_1 + bed_2 + bed_3;
     
     fitness = 50000 - objective_function;
+    
+    //TEST
+    // if(objective_function >= 412463)
+    // {
+    //     std::cout << "EVAL::FP" << std::endl;
+    //     std::cout << "obj func = " << objective_function << std::endl;
+    //     std::cout << "kitchen length = " << 6 + variables[1] << std::endl;
+    //     std::cout << "kitchen width = " << 6 + variables[2]<< std::endl;
+    //     std::cout << "kitchen area = " << (6 + variables[1])*(6 + variables[2]) << std::endl;
+    //     std::cout << "kitchen = " << kitchen << std::endl;
+    //     char t;
+    //     std::cin >> t;
+    // }
+    //     fitness = 412463 - objective_function;
 
     deleter(variables);
     deleter(catch_block_data);
@@ -198,11 +239,11 @@ double floorPlanning(Individual& individual, int variable_count, int bit_length[
         return objective_function;
 }
 
-//MAXIMUM FITNESS SHOULD BE ~78.64
+//MAXIMUM FITNESS SHOULD BE 78.6432
 double deJong_F1(Individual& individual)
 {
     double fitness;
-    double *variables = decode(individual, 9, 99.8046875);
+    double *variables = decode(individual, 10, 99.8046875);
 
     double objective_function = pow(variables[0],2) + pow(variables[1],2) + pow(variables[2],2);
 
@@ -217,7 +258,7 @@ double deJong_F1(Individual& individual)
 double deJong_F2(Individual& individual)
 {
     double fitness;
-    double *variables = decode(individual, 11, 999.51171875);
+    double *variables = decode(individual, 12, 999.51171875);
 
     double objective_function = 100*pow(pow(variables[0],2)-variables[1], 2) + pow(1 - variables[0], 2);
 
@@ -229,15 +270,15 @@ double deJong_F2(Individual& individual)
     return fitness;
 }
 
-//MAXIMUM FITNESS SHOULD BE 55.6
+//MAXIMUM FITNESS SHOULD BE 60
 double deJong_F3(Individual& individual)
 {
     double fitness;
-    double *variables = decode(individual, 9, 99.8046875);
+    double *variables = decode(individual, 10, 99.8046875);
 
     double objective_function = floor(variables[0]) + floor(variables[1]) + floor(variables[2]) + floor(variables[3]) + floor(variables[4]);
 
-    fitness = (double)25.6 - objective_function;
+    fitness = (double)30 - objective_function;
 
     deleter(variables);
 
@@ -248,7 +289,7 @@ double deJong_F3(Individual& individual)
 double deJong_F4(Individual& individual, int random_seed, int srand_offset)
 {
     double fitness;
-    double *variables = decode(individual, 7, 99.21875);
+    double *variables = decode(individual, 8, 99.21875);
 
     std::default_random_engine generator(srand_offset);
     std::normal_distribution<double> gauss{0,1};
@@ -270,21 +311,21 @@ double deJong_F4(Individual& individual, int random_seed, int srand_offset)
     if(objective_function < 0)
         objective_function = 0 - objective_function;
 
-    fitness = 1300 - objective_function;
+    fitness = (double)1300 - objective_function;
 
     deleter(variables);
 
     return fitness;
 }
 
-//MAX FITNESS SHOULD BE 1.0
+//MAX FITNESS SHOULD BE 1
 double deJong_F5(Individual& individual)
 {
     int a[2][25] = {{-32,-16,0,16,32,-32,-16,0,16,32,-32,-16,0,16,32,-32,-16,0,16,32,-32,-16,0,16,32},
                         {-32,-32,-32,-32,-32,-16,-16,-16,-16,-16,0,0,0,0,0,16,16,16,16,16,32,32,32,32,32}};
 
     double fitness;
-    double *variables = decode(individual, 16, 999.9847412109375);
+    double *variables = decode(individual, 17, 999.9847412109375);
 
     double objective_function_pt1[2][25];
     for(int j = 0; j < 25; j++)
@@ -299,7 +340,7 @@ double deJong_F5(Individual& individual)
 
     double objective_function = 0.002 + objective_function_pt2;
 
-    fitness = (double)1/objective_function;
+    fitness = (double)1.002 - objective_function;
 
     deleter(variables);
 
@@ -311,7 +352,7 @@ double deJong_F5(Individual& individual)
 double deJong_F1_o(Individual& individual)
 {
     double fitness;
-    double *variables = decode(individual, 9, 99.8046875);
+    double *variables = decode(individual, 10, 99.8046875);
 
     double objective_function = pow(variables[0],2) + pow(variables[1],2) + pow(variables[2],2);
 
@@ -326,7 +367,7 @@ double deJong_F1_o(Individual& individual)
 double deJong_F2_o(Individual& individual)
 {
     double fitness;
-    double *variables = decode(individual, 11, 999.51171875);
+    double *variables = decode(individual, 12, 999.51171875);
 
     double objective_function = 100*pow(pow(variables[0],2)-variables[1], 2) + pow(1 - variables[0], 2);
 
@@ -342,7 +383,7 @@ double deJong_F2_o(Individual& individual)
 double deJong_F3_o(Individual& individual)
 {
     double fitness;
-    double *variables = decode(individual, 9, 99.8046875);
+    double *variables = decode(individual, 10, 99.8046875);
 
     double objective_function = floor(variables[0]) + floor(variables[1]) + floor(variables[2]) + floor(variables[3]) + floor(variables[4]);
 
@@ -356,7 +397,7 @@ double deJong_F3_o(Individual& individual)
 double deJong_F4_o(Individual& individual, int random_seed, int srand_offset)
 {
     double fitness;
-    double *variables = decode(individual, 7, 99.21875);
+    double *variables = decode(individual, 8, 99.21875);
 
     std::default_random_engine generator(srand_offset);
     std::normal_distribution<double> gauss{0,1};
@@ -391,7 +432,7 @@ double deJong_F5_o(Individual& individual)
                         {-32,-32,-32,-32,-32,-16,-16,-16,-16,-16,0,0,0,0,0,16,16,16,16,16,32,32,32,32,32}};
 
     double fitness;
-    double *variables = decode(individual, 16, 999.9847412109375);
+    double *variables = decode(individual, 17, 999.9847412109375);
 
     double objective_function_pt1[2][25];
     for(int j = 0; j < 25; j++)
